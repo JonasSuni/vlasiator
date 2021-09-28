@@ -32,6 +32,7 @@
 #include "../../backgroundfield/dipole.hpp"
 #include "../../backgroundfield/linedipole.hpp"
 #include "../../backgroundfield/vectordipole.hpp"
+#include "../../backgroundfield/modifieddipole.hpp"
 #include "../../object_wrapper.h"
 
 #include "Magnetosphere.h"
@@ -217,6 +218,7 @@ namespace projects {
       Dipole bgFieldDipole;
       LineDipole bgFieldLineDipole;
       VectorDipole bgVectorDipole;
+      ModifiedDipole bgModifiedDipole;
 
       // The hardcoded constants of dipole and line dipole moments are obtained
       // from Daldorff et al (2014), see
@@ -245,7 +247,14 @@ namespace projects {
                bgFieldDipole.initialize(8e15 *this->dipoleScalingFactor, this->dipoleMirrorLocationX, 0.0, 0.0, 0.0 );//mirror
                setBackgroundField(bgFieldDipole, BgBGrid, true);
                break; 
-            case 4:  // Vector potential dipole, vanishes or optionally scales to static inflow value after a given x-coordinate
+            case 4:
+               bgModifiedDipole.initialize(8e15 *this->dipoleScalingFactor, 0.0, 0.0, 0.0, 0.0 );//set dipole moment
+               setBackgroundField(bgModifiedDipole, BgBGrid);
+               //Append mirror dipole                
+               bgModifiedDipole.initialize(8e15 *this->dipoleScalingFactor, this->dipoleMirrorLocationX, 0.0, 0.0, 0.0 );//mirror
+               setBackgroundField(bgModifiedDipole, BgBGrid, true);
+               break; 
+            case 5:  // Vector potential dipole, vanishes or optionally scales to static inflow value after a given x-coordinate
 	       // What we in fact do is we place the regular dipole in the background field, and the
 	       // corrective terms in the perturbed field. This maintains the BGB as curl-free.
 	       bgFieldDipole.initialize(8e15 *this->dipoleScalingFactor, 0.0, 0.0, 0.0, 0.0 );//set dipole moment

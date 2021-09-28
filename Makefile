@@ -184,7 +184,7 @@ DEPS_VLSVMOVER_AMR = ${DEPS_CELL} vlasovsolver_amr/vlasovmover.cpp vlasovsolver_
 
 #all objects for vlasiator
 
-OBJS = 	version.o memoryallocation.o backgroundfield.o quadr.o dipole.o linedipole.o vectordipole.o constantfield.o integratefunction.o \
+OBJS = 	version.o memoryallocation.o backgroundfield.o quadr.o dipole.o modifieddipole.o linedipole.o vectordipole.o constantfield.o integratefunction.o \
 	datareducer.o datareductionoperator.o dro_populations.o amr_refinement_criteria.o\
 	donotcompute.o ionosphere.o outflow.o setbyuser.o setmaxwellian.o\
 	sysboundary.o sysboundarycondition.o particle_species.o\
@@ -242,7 +242,10 @@ memoryallocation.o: memoryallocation.cpp
 	 ${CMP} ${CXXFLAGS} ${FLAGS} -c memoryallocation.cpp ${INC_PAPI}
 
 dipole.o: backgroundfield/dipole.cpp backgroundfield/dipole.hpp backgroundfield/fieldfunction.hpp backgroundfield/functions.hpp
-	${CMP} ${CXXFLAGS} ${FLAGS} -c backgroundfield/dipole.cpp 
+	${CMP} ${CXXFLAGS} ${FLAGS} -c backgroundfield/dipole.cpp
+
+modifieddipole.o: backgroundfield/modifieddipole.cpp backgroundfield/modifieddipole.hpp backgroundfield/fieldfunction.hpp backgroundfield/functions.hpp
+	${CMP} ${CXXFLAGS} ${FLAGS} -c backgroundfield/modifieddipole.cpp
 
 linedipole.o: backgroundfield/linedipole.cpp backgroundfield/linedipole.hpp backgroundfield/fieldfunction.hpp backgroundfield/functions.hpp
 	${CMP} ${CXXFLAGS} ${FLAGS} -c backgroundfield/linedipole.cpp
