@@ -121,7 +121,9 @@ void propagatePencil(
                // Loop over 3rd (vectorized) vspace dimension
                #pragma omp simd
                for (uint iv = 0; iv < VECL; iv++) {
-                  block_data[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  if (isfinite(vector[iv]) && (vector[iv]>0)) {
+                     block_data[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  }
                }
             }
             if (areaRatio_p1 && block_data_p1) {
@@ -131,7 +133,9 @@ void propagatePencil(
                // Loop over 3rd (vectorized) vspace dimension
                #pragma omp simd
                for (uint iv = 0; iv < VECL; iv++) {
-                  block_data_p1[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  if (isfinite(vector[iv]) && (vector[iv]>0)) {
+                     block_data_p1[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  }
                }
             }
             if (areaRatio_m1 && block_data_m1) {
@@ -141,7 +145,9 @@ void propagatePencil(
                // Loop over 3rd (vectorized) vspace dimension
                #pragma omp simd
                for (uint iv = 0; iv < VECL; iv++) {
-                  block_data_m1[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  if (isfinite(vector[iv]) && (vector[iv]>0)) {
+                     block_data_m1[cellid_transpose[iv + planeVector * VECL + k * WID2]] += vector[iv];
+                  }
                }
             }
          }
