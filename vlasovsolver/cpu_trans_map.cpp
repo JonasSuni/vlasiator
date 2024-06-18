@@ -579,9 +579,9 @@ bool trans_map_1d(const dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpi
          }
       
          //store values from target_values array to the actual blocks
-         for(uint celli = 0; celli < localPropagatedCells.size(); celli++){
-            if(targetsValid[celli]) {
-               for(uint ti = 0; ti < 3; ti++) {
+         for (uint celli = 0; celli < localPropagatedCells.size(); celli++) {
+            if (targetsValid[celli]) {
+               for (uint ti = 0; ti < 3; ti++) {
                   SpatialCell* spatial_cell = targetNeighbors[celli * 3 + ti];
                   if(spatial_cell ==NULL) {
                      //invalid target spatial cell
@@ -597,8 +597,11 @@ bool trans_map_1d(const dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpi
                      continue;
                   }
                   Realf* blockData = spatial_cell->get_data(blockLID, popID);
-                  for(int i = 0; i < WID3 ; i++) {
-                     blockData[i] += targetBlockData[(celli * 3 + ti) * WID3 + i];
+                  for (int i = 0; i < WID3 ; i++) {
+                     const Realf tval = targetBlockData[(celli * 3 + ti) * WID3 + i];
+                     if (isfinite(tval) && (tval>0)) {
+                        blockData[i] += tval;
+                     }
                   }
                }
             }
