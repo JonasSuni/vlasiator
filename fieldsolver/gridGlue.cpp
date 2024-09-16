@@ -105,37 +105,37 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
 
    // Kernel Characteristics
    const int kernelOffset = 2;   // offset of 5 pointstencil 3D kernel => (floor(stencilWidth/2);)
-   const Real kernelSum=729.0;   // the total kernel's sum 
+   const Real inverseKernelSum = 1.0 / 729.0;   // the inverse of the total kernel's sum 
    const static Real kernel[5][5][5] ={
-                                 {{ 1,  2,  3,  2,  1},
-                                 { 2,  4,  6,  4,  2},
-                                 { 3,  6,  9,  6,  3},
-                                 { 2,  4,  6,  4,  2},
-                                 { 1,  2,  3,  2,  1}},
+                                 {{ 1 * inverseKernelSum,  2 * inverseKernelSum,  3 * inverseKernelSum,  2 * inverseKernelSum,  1 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 3 * inverseKernelSum,  6 * inverseKernelSum,  9 * inverseKernelSum,  6 * inverseKernelSum,  3 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 1 * inverseKernelSum,  2 * inverseKernelSum,  3 * inverseKernelSum,  2 * inverseKernelSum,  1 * inverseKernelSum}},
 
-                                 {{ 2,  4,  6,  4,  2},
-                                 { 4,  8, 12,  8,  4},
-                                 { 6, 12, 18, 12,  6},
-                                 { 4,  8, 12,  8,  4},
-                                 { 2,  4,  6,  4,  2}},
+                                 {{ 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 4 * inverseKernelSum,  8 * inverseKernelSum, 12 * inverseKernelSum,  8 * inverseKernelSum,  4 * inverseKernelSum},
+                                 { 6 * inverseKernelSum, 12 * inverseKernelSum, 18 * inverseKernelSum, 12 * inverseKernelSum,  6 * inverseKernelSum},
+                                 { 4 * inverseKernelSum,  8 * inverseKernelSum, 12 * inverseKernelSum,  8 * inverseKernelSum,  4 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum}},
 
-                                 {{ 3,  6,  9,  6,  3},
-                                 { 6, 12, 18, 12,  6},
-                                 { 9, 18, 27, 18,  9},
-                                 { 6, 12, 18, 12,  6},
-                                 { 3,  6,  9,  6,  3}},
+                                 {{ 3 * inverseKernelSum,  6 * inverseKernelSum,  9 * inverseKernelSum,  6 * inverseKernelSum,  3 * inverseKernelSum},
+                                 { 6 * inverseKernelSum, 12 * inverseKernelSum, 18 * inverseKernelSum, 12 * inverseKernelSum,  6 * inverseKernelSum},
+                                 { 9 * inverseKernelSum, 18 * inverseKernelSum, 27 * inverseKernelSum, 18 * inverseKernelSum,  9 * inverseKernelSum},
+                                 { 6 * inverseKernelSum, 12 * inverseKernelSum, 18 * inverseKernelSum, 12 * inverseKernelSum,  6 * inverseKernelSum},
+                                 { 3 * inverseKernelSum,  6 * inverseKernelSum,  9 * inverseKernelSum,  6 * inverseKernelSum,  3 * inverseKernelSum}},
 
-                                 {{ 2,  4,  6,  4,  2},
-                                 { 4,  8, 12,  8,  4},
-                                 { 6, 12, 18, 12,  6},
-                                 { 4,  8, 12,  8,  4},
-                                 { 2,  4,  6,  4,  2}},
+                                 {{ 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 4 * inverseKernelSum,  8 * inverseKernelSum, 12 * inverseKernelSum,  8 * inverseKernelSum,  4 * inverseKernelSum},
+                                 { 6 * inverseKernelSum, 12 * inverseKernelSum, 18 * inverseKernelSum, 12 * inverseKernelSum,  6 * inverseKernelSum},
+                                 { 4 * inverseKernelSum,  8 * inverseKernelSum, 12 * inverseKernelSum,  8 * inverseKernelSum,  4 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum}},
 
-                                 {{ 1,  2,  3,  2,  1},
-                                 { 2,  4,  6,  4,  2},
-                                 { 3,  6,  9,  6,  3},
-                                 { 2,  4,  6,  4,  2},
-                                 { 1,  2,  3,  2,  1}}
+                                 {{ 1 * inverseKernelSum,  2 * inverseKernelSum,  3 * inverseKernelSum,  2 * inverseKernelSum,  1 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 3 * inverseKernelSum,  6 * inverseKernelSum,  9 * inverseKernelSum,  6 * inverseKernelSum,  3 * inverseKernelSum},
+                                 { 2 * inverseKernelSum,  4 * inverseKernelSum,  6 * inverseKernelSum,  4 * inverseKernelSum,  2 * inverseKernelSum},
+                                 { 1 * inverseKernelSum,  2 * inverseKernelSum,  3 * inverseKernelSum,  2 * inverseKernelSum,  1 * inverseKernelSum}}
                                  };
 
    // Update momentsGrid Ghost Cells
@@ -150,7 +150,7 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
    for (int blurPass = 0; blurPass < Parameters::maxFilteringPasses; blurPass++){
 
       // Blurring Pass
-      #pragma omp parallel for collapse(2)
+      #pragma omp parallel for collapse(3)
       for (FsGridTools::FsIndex_t k = 0; k < mntDims[2]; k++){
          for (FsGridTools::FsIndex_t j = 0; j < mntDims[1]; j++){
             for (FsGridTools::FsIndex_t i = 0; i < mntDims[0]; i++){
@@ -169,6 +169,7 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
             
                // Set Cell to zero before passing filter
                swap = swapGrid.get(i,j,k);
+               #pragma omp simd
                for (int e = 0; e < fsgrids::moments::N_MOMENTS; ++e) {
                   swap->at(e)=0.0;
                }
@@ -178,16 +179,13 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
                   for (int b=-kernelOffset; b<=kernelOffset; b++){
                      for (int a=-kernelOffset; a<=kernelOffset; a++){
                         cell = momentsGrid.get(i+a,j+b,k+c);
+                        #pragma omp simd
                         for (int e = 0; e < fsgrids::moments::N_MOMENTS; ++e) {
                            swap->at(e)+=cell->at(e) *kernel[kernelOffset+a][kernelOffset+b][kernelOffset+c];
                         } 
                      }
                   }
                }//inner filtering loop
-               //divide by the total kernel sum
-               for (int e = 0; e < fsgrids::moments::N_MOMENTS; ++e) {
-                  swap->at(e)/=kernelSum;
-               }
             }
          }
       } //spatial loops
@@ -307,6 +305,7 @@ void getFieldsFromFsGrid(
    FsGrid< std::array<Real, fsgrids::volfields::N_VOL>, FS_STENCIL_WIDTH> & volumeFieldsGrid,
    FsGrid< std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH> & BgBGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
+   FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
    dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
    const std::vector<CellID>& cells
@@ -398,6 +397,7 @@ void getFieldsFromFsGrid(
             std::array<Real, fsgrids::volfields::N_VOL> * volcell = volumeFieldsGrid.get(fsgridCell);
             std::array<Real, fsgrids::bgbfield::N_BGB> * bgcell = BgBGrid.get(fsgridCell);
             std::array<Real, fsgrids::egradpe::N_EGRADPE> * egradpecell = EGradPeGrid.get(fsgridCell);	
+            std::array<Real, fsgrids::dmoments::N_DMOMENTS> * dMomentscell = dMomentsGrid.get(fsgridCell);	
             
             sendBuffer[ii].sums[FieldsToCommunicate::PERBXVOL] += volcell->at(fsgrids::volfields::PERBXVOL);
             sendBuffer[ii].sums[FieldsToCommunicate::PERBYVOL] += volcell->at(fsgrids::volfields::PERBYVOL);
@@ -411,6 +411,15 @@ void getFieldsFromFsGrid(
             sendBuffer[ii].sums[FieldsToCommunicate::dPERBZVOLdx] += volcell->at(fsgrids::volfields::dPERBZVOLdx) / technicalGrid.DX;
             sendBuffer[ii].sums[FieldsToCommunicate::dPERBZVOLdy] += volcell->at(fsgrids::volfields::dPERBZVOLdy) / technicalGrid.DY;
             sendBuffer[ii].sums[FieldsToCommunicate::dPERBZVOLdz] += volcell->at(fsgrids::volfields::dPERBZVOLdz) / technicalGrid.DZ;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVxdx] += dMomentscell->at(fsgrids::dmoments::dVxdx) / technicalGrid.DX;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVxdy] += dMomentscell->at(fsgrids::dmoments::dVxdy) / technicalGrid.DY;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVxdz] += dMomentscell->at(fsgrids::dmoments::dVxdz) / technicalGrid.DZ;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVydx] += dMomentscell->at(fsgrids::dmoments::dVydx) / technicalGrid.DX;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVydy] += dMomentscell->at(fsgrids::dmoments::dVydy) / technicalGrid.DY;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVydz] += dMomentscell->at(fsgrids::dmoments::dVydz) / technicalGrid.DZ;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVzdx] += dMomentscell->at(fsgrids::dmoments::dVzdx) / technicalGrid.DX;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVzdy] += dMomentscell->at(fsgrids::dmoments::dVzdy) / technicalGrid.DY;
+            sendBuffer[ii].sums[FieldsToCommunicate::dVzdz] += dMomentscell->at(fsgrids::dmoments::dVzdz) / technicalGrid.DZ;
             sendBuffer[ii].sums[FieldsToCommunicate::BGBXVOL] += bgcell->at(fsgrids::bgbfield::BGBXVOL);
             sendBuffer[ii].sums[FieldsToCommunicate::BGBYVOL] += bgcell->at(fsgrids::bgbfield::BGBYVOL);
             sendBuffer[ii].sums[FieldsToCommunicate::BGBZVOL] += bgcell->at(fsgrids::bgbfield::BGBZVOL);
@@ -470,6 +479,15 @@ void getFieldsFromFsGrid(
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdx] = cellAggregate.second.sums[FieldsToCommunicate::dPERBZVOLdx] / cellAggregate.second.cells;
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdy] = cellAggregate.second.sums[FieldsToCommunicate::dPERBZVOLdy] / cellAggregate.second.cells;
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdz] = cellAggregate.second.sums[FieldsToCommunicate::dPERBZVOLdz] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdx] = cellAggregate.second.sums[FieldsToCommunicate::dVxdx] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdy] = cellAggregate.second.sums[FieldsToCommunicate::dVxdy] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdz] = cellAggregate.second.sums[FieldsToCommunicate::dVxdz] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydx] = cellAggregate.second.sums[FieldsToCommunicate::dVydx] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydy] = cellAggregate.second.sums[FieldsToCommunicate::dVydy] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydz] = cellAggregate.second.sums[FieldsToCommunicate::dVydz] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdx] = cellAggregate.second.sums[FieldsToCommunicate::dVzdx] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdy] = cellAggregate.second.sums[FieldsToCommunicate::dVzdy] / cellAggregate.second.cells;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdz] = cellAggregate.second.sums[FieldsToCommunicate::dVzdz] / cellAggregate.second.cells;
       cellParams[CellParams::BGBXVOL]  = cellAggregate.second.sums[FieldsToCommunicate::BGBXVOL] / cellAggregate.second.cells;
       cellParams[CellParams::BGBYVOL]  = cellAggregate.second.sums[FieldsToCommunicate::BGBYVOL] / cellAggregate.second.cells;
       cellParams[CellParams::BGBZVOL]  = cellAggregate.second.sums[FieldsToCommunicate::BGBZVOL] / cellAggregate.second.cells;
@@ -497,6 +515,15 @@ void getFieldsFromFsGrid(
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdx] = 0;
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdy] = 0;
       mpiGrid[cellAggregate.first]->derivativesBVOL[bvolderivatives::dPERBZVOLdz] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdx] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdy] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVxdz] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydx] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydy] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVydz] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdx] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdy] = 0;
+      mpiGrid[cellAggregate.first]->derivativesV[vderivatives::dVzdz] = 0;
       cellParams[CellParams::BGBXVOL]  = 0;
       cellParams[CellParams::BGBYVOL]  = 0;
       cellParams[CellParams::BGBZVOL]  = 0;
