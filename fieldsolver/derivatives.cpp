@@ -810,9 +810,10 @@ void calculateScaledDeltas(
    }
 
    // Now, rotation matrix to get parallel and perpendicular pressure
-   //Eigen::Quaterniond q {Quaterniond::FromTwoVectors(Eigen::vector3d{0, 0, 1}, Eigen::vector3d{myB[0], myB[1], myB[2]})};
-   //Eigen::Matrix3d rot = q.toRotationMatrix();
-   Eigen::Matrix3d rot = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{0, 0, 1}, Eigen::Vector3d{myB[0], myB[1], myB[2]}).toRotationMatrix();
+   Eigen::Quaterniond q {Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1})};
+   q.normalize();
+   Eigen::Matrix3d rot = q.toRotationMatrix();
+   // Eigen::Matrix3d rot = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1}).toRotationMatrix();
    Eigen::Matrix3d P {
       {cell->parameters[CellParams::P_11], cell->parameters[CellParams::P_12], cell->parameters[CellParams::P_13]},
       {cell->parameters[CellParams::P_12], cell->parameters[CellParams::P_22], cell->parameters[CellParams::P_23]},
