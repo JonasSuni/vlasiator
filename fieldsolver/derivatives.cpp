@@ -809,7 +809,7 @@ void calculateScaledDeltas(
       Bperp = std::sqrt(Bperp);
    }
 
-   Real myBmag = std::sqrt(std::pow(myB[0], 2) + std::pow(myB[1], 2) + std::pow(myB[1],2))
+   Real myBmag = std::sqrt(std::pow(myB[0], 2) + std::pow(myB[1], 2) + std::pow(myB[1],2));
 
    // Now, rotation matrix to get parallel and perpendicular pressure
    Eigen::Quaterniond q {Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0] / myBmag, myB[1] / myBmag, myB[2] / myBmag}, Eigen::Vector3d{0, 0, 1})};
