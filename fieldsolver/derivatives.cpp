@@ -809,10 +809,10 @@ void calculateScaledDeltas(
       Bperp = std::sqrt(Bperp);
    }
 
-   Real myBmag = std::sqrt(std::pow(myB[0], 2) + std::pow(myB[1], 2) + std::pow(myB[1],2));
+   //Real myBmag = std::sqrt(std::pow(myB[0], 2) + std::pow(myB[1], 2) + std::pow(myB[1],2));
 
    // Now, rotation matrix to get parallel and perpendicular pressure
-   Eigen::Quaterniond q {Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0] / myBmag, myB[1] / myBmag, myB[2] / myBmag}, Eigen::Vector3d{0, 0, 1})};
+   Eigen::Quaterniond q {Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1})};
    q.normalize();
    Eigen::Matrix3d rot = q.toRotationMatrix();
    // Eigen::Matrix3d rot = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1}).toRotationMatrix();
@@ -822,7 +822,8 @@ void calculateScaledDeltas(
       {cell->parameters[CellParams::P_13], cell->parameters[CellParams::P_23], cell->parameters[CellParams::P_33]},
    };
    
-   Eigen::Matrix3d Pprime = rot * P * rot.transpose();
+   Eigen::Matrix3d rott = rot.transpose();
+   Eigen::Matrix3d Pprime = rot * P * rott;
 
    Real Panisotropy {0.0};
    if (Pprime(2, 2) > EPS) {
