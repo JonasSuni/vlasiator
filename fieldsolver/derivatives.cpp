@@ -825,13 +825,13 @@ void calculateScaledDeltas(
    Eigen::Matrix3d rott = rot.transpose();
    Eigen::Matrix3d Pprime = rot * P * rott;
 
-   if (cell->parameters[CellParams::CELLID] == 1234) {
-      std::cerr << "Original Ptensor" << P << "\n" << "Rotated Ptensor" << Pprime << std::endl;
-   }
-
    Real Panisotropy {0.0};
    if (Pprime(2, 2) > EPS) {
       Panisotropy = (Pprime(0, 0) + Pprime(1, 1)) / (2 * Pprime(2, 2));
+   }
+
+   if (cell->parameters[CellParams::CELLID] == 1234) {
+      std::cerr << "Original Ptensor\n" << P << "\n" << "Rotated Ptensor\n" << Pprime << "\n" << "Panisotropy\n" << Panisotropy << std::endl;
    }
 
    // Vorticity
