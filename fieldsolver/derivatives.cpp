@@ -830,6 +830,10 @@ void calculateScaledDeltas(
       Panisotropy = (Pprime(0, 0) + Pprime(1, 1)) / (2 * Pprime(2, 2));
    }
 
+   // if (cell->parameters[CellParams::CELLID] == 1234) {
+   //    std::cerr << "Original Ptensor\n" << P << "\n" << "Rotated Ptensor\n" << Pprime << "\n" << "Panisotropy\n" << Panisotropy << std::endl;
+   // }
+
    // Vorticity
    Real dVxdy {cell->derivativesV[vderivatives::dVxdy]};
    Real dVxdz {cell->derivativesV[vderivatives::dVxdz]};
