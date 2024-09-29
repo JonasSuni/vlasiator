@@ -825,7 +825,7 @@ void calculateScaledDeltas(
    Eigen::Matrix3d rott = rot.transpose();
    Eigen::Matrix3d Pprime = rot * P * rott;
 
-   if (cell->parameters[CellParams::CELLID] == 1) {
+   if (cell->parameters[CellParams::CELLID] == 1234) {
       std::cerr << "Original Ptensor" << P << "\n" << "Rotated Ptensor" << Pprime << std::endl;
    }
 
