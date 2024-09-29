@@ -56,6 +56,9 @@ void calculateCellMoments(spatial_cell::SpatialCell* cell,
       cell->parameters[CellParams::P_11] = 0.0;
       cell->parameters[CellParams::P_22] = 0.0;
       cell->parameters[CellParams::P_33] = 0.0;
+      cell->parameters[CellParams::P_23] = 0.0;
+      cell->parameters[CellParams::P_13] = 0.0;
+      cell->parameters[CellParams::P_12] = 0.0;
    }
 
     // Loop over all particle species
