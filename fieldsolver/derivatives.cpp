@@ -812,27 +812,22 @@ void calculateScaledDeltas(
    //Real myBmag = std::sqrt(std::pow(myB[0], 2) + std::pow(myB[1], 2) + std::pow(myB[1],2));
 
    // Now, rotation matrix to get parallel and perpendicular pressure
-   Eigen::Quaterniond q {Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1})};
-   q.normalize();
-   Eigen::Matrix3d rot = q.toRotationMatrix();
-   // Eigen::Matrix3d rot = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1}).toRotationMatrix();
+   //Eigen::Quaterniond q {Quaterniond::FromTwoVectors(Eigen::vector3d{0, 0, 1}, Eigen::vector3d{myB[0], myB[1], myB[2]})};
+   //Eigen::Matrix3d rot = q.toRotationMatrix();
+   Eigen::Matrix3d rot = Eigen::Quaterniond::FromTwoVectors(Eigen::Vector3d{myB[0], myB[1], myB[2]}, Eigen::Vector3d{0, 0, 1}).normalized().toRotationMatrix();
    Eigen::Matrix3d P {
       {cell->parameters[CellParams::P_11], cell->parameters[CellParams::P_12], cell->parameters[CellParams::P_13]},
       {cell->parameters[CellParams::P_12], cell->parameters[CellParams::P_22], cell->parameters[CellParams::P_23]},
       {cell->parameters[CellParams::P_13], cell->parameters[CellParams::P_23], cell->parameters[CellParams::P_33]},
    };
    
-   Eigen::Matrix3d rott = rot.transpose();
-   Eigen::Matrix3d Pprime = rot * P * rott;
+   Eigen::Matrix3d transposerot = rot.transpose();
+   Eigen::Matrix3d Pprime = rot * P * transposerot;
 
    Real Panisotropy {0.0};
    if (Pprime(2, 2) > EPS) {
       Panisotropy = (Pprime(0, 0) + Pprime(1, 1)) / (2 * Pprime(2, 2));
    }
-
-   // if (cell->parameters[CellParams::CELLID] == 1234) {
-   //    std::cerr << "Original Ptensor\n" << P << "\n" << "Rotated Ptensor\n" << Pprime << "\n" << "Panisotropy\n" << Panisotropy << std::endl;
-   // }
 
    // Vorticity
    Real dVxdy {cell->derivativesV[vderivatives::dVxdy]};
