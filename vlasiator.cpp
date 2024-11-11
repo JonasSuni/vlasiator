@@ -160,8 +160,8 @@ void computeNewTimeStep(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpi
    dtMaxLocal[2] = numeric_limits<Real>::max();
 
    #pragma omp simd reduction(min:dtMaxLocal)
-   for (vector<CellID>::const_iterator cell_id = cells.begin(); cell_id != cells.end(); ++cell_id) {
-      SpatialCell* cell = mpiGrid[*cell_id];
+   for (size_t i = 0; i < cells.size(); i++) {
+      SpatialCell* cell = mpiGrid[cells[i]];
       const Real dx = cell->parameters[CellParams::DX];
       const Real dy = cell->parameters[CellParams::DY];
       const Real dz = cell->parameters[CellParams::DZ];
