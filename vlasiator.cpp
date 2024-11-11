@@ -13,8 +13,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
@@ -304,17 +303,16 @@ void recalculateLocalCellsCache() {
 // Add thread-local storage for frequently accessed data
 thread_local vector<CellID> threadLocalCells;
 
+// Move static variables to file scope
+static vector<int> doNow(3, 0);
+static const Real DT_EPSILON = 1e-12;
+
 // Optimize main simulation loop
 int simulate(int argn, char* args[]) {
-    // Pre-allocate vectors used in loop
-    static vector<int> doNow(3, 0);
-    
     // Cache frequently accessed parameters
-    const Real dt_epsilon = DT_EPSILON;
     const int master_rank = MASTER_RANK;
     
     int myRank, doBailout=0;
-    const creal DT_EPSILON=1e-12;
     typedef Parameters P;
     Real newDt;
     bool dtIsChanged {false};
@@ -827,7 +825,6 @@ int simulate(int argn, char* args[]) {
 
     unsigned int wallTimeRestartCounter=1;
 
-    int doNow[3] = {0}; // 0: writeRestartNow, 1: balanceLoadNow, 2: refineNow ; declared outside main loop
     int writeRestartNow; // declared outside main loop
     bool overrideRebalanceNow = false; // declared outside main loop
     bool refineNow = false; // declared outside main loop
@@ -841,7 +838,7 @@ int simulate(int argn, char* args[]) {
     double beforeStep=P::tstep_min;
    
     while(P::tstep <= P::tstep_max  &&
-          P::t-P::dt <= P::t_max+dt_epsilon &&
+          P::t-P::dt <= P::t_max+DT_EPSILON &&
           wallTimeRestartCounter <= P::exitAfterRestarts) {
       
         addTimedBarrier("barrier-loop-start");
@@ -867,7 +864,7 @@ int simulate(int argn, char* args[]) {
          
             double currentTime=MPI_Wtime();
             double timePerStep=double(currentTime  - beforeTime) / (P::tstep-beforeStep);
-            double timePerSecond=double(currentTime  - beforeTime) / (P::t-beforeSimulationTime + dt_epsilon);
+            double timePerSecond=double(currentTime  - beforeTime) / (P::t-beforeSimulationTime + DT_EPSILON);
             double remainingTime=min(timePerStep*(P::tstep_max-P::tstep),timePerSecond*(P::t_max-P::t));
             time_t finalWallTime=time(NULL)+(time_t)remainingTime; //assume time_t is in seconds, as it is almost always
             struct tm *finalWallTimeInfo=localtime(&finalWallTime);
@@ -903,7 +900,7 @@ int simulate(int argn, char* args[]) {
         // write system, loop through write classes
         for (uint i = 0; i < P::systemWriteTimeInterval.size(); i++) {
             if (P::systemWriteTimeInterval[i] >= 0.0 &&
-                P::t >= P::systemWrites[i] * P::systemWriteTimeInterval[i] - dt_epsilon) {
+                P::t >= P::systemWrites[i] * P::systemWriteTimeInterval[i] - DT_EPSILON) {
                 // If we have only just restarted, the bulk file should already exist from the previous slot.
                 if ((P::tstep == P::tstep_min) && (P::tstep>0)) {
                     P::systemWrites[i]++;
@@ -1343,7 +1340,7 @@ int simulate(int argn, char* args[]) {
         } else {
             timePerStep=double(after  - startTime) / (P::tstep-P::tstep_min);
         }
-        double timePerSecond=double(after  - startTime) / (P::t-P::t_min+dt_epsilon);
+        double timePerSecond=double(after  - startTime) / (P::t-P::t_min+DT_EPSILON);
         logFile << "(MAIN): All timesteps calculated." << endl;
         logFile << "\t (TIME) total run time " << after - startTime << " s, total simulated time " << P::t -P::t_min<< " s" << endl;
         if(P::t != 0.0) {
