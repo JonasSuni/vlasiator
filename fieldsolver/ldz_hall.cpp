@@ -437,12 +437,12 @@ struct HallTermHelpers {
 // Template for calculating Hall term components
 template<typename Component>
 void calculateEdgeHallTermComponents(
-   const FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
+   FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
    FsGrid<std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH>& EHallGrid,
-   const FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>& momentsGrid,
-   const FsGrid<std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH>& dPerBGrid,
-   const FsGrid<std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH>& dMomentsGrid,
-   const FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
+   FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>& momentsGrid,
+   FsGrid<std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH>& dPerBGrid,
+   FsGrid<std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH>& dMomentsGrid,
+   FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
    const FsGrid<fsgrids::technical, FS_STENCIL_WIDTH>& technicalGrid,
    const std::array<Real, Rec::N_REC_COEFFICIENTS>& perturbedCoefficients,
    const int i, const int j, const int k) {
@@ -456,16 +456,16 @@ void calculateEdgeHallTermComponents(
          const Real invDy = 1.0 / technicalGrid.DY;
          const Real invDz = 1.0 / technicalGrid.DZ;
          
-         // Use const_cast here since get() is non-const but we know the access is read-only
-         const Real Bx = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBX) + 
-                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBX);
-         const Real By = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBY) + 
-                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBY);
-         const Real Bz = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBZ) + 
-                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBZ);
+         // Direct grid access since we removed const
+         const Real Bx = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBX) + 
+                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBX);
+         const Real By = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBY) + 
+                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBY);
+         const Real Bz = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBZ) + 
+                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZ);
          
          const Real hallRhoq = HallTermHelpers::getHallRhoq(
-            const_cast<FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>&>(momentsGrid).get(i,j,k)->at(fsgrids::moments::RHOQ));
+            momentsGrid.get(i,j,k)->at(fsgrids::moments::RHOQ));
             
          Component::calculate(EHallGrid, Bx, By, Bz, invDx, invDy, invDz, hallRhoq);
          break;
@@ -545,12 +545,12 @@ inline const std::array<T,S>* getGrid(const FsGrid<std::array<T,S>, FS_STENCIL_W
 
 template<typename Component>
 void calculateEdgeHallTermComponents(
-   const FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
+   FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
    FsGrid<std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH>& EHallGrid,
-   const FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>& momentsGrid,
-   const FsGrid<std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH>& dPerBGrid, 
-   const FsGrid<std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH>& dMomentsGrid,
-   const FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
+   FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>& momentsGrid,
+   FsGrid<std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH>& dPerBGrid, 
+   FsGrid<std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH>& dMomentsGrid,
+   FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
    const FsGrid<fsgrids::technical, FS_STENCIL_WIDTH>& technicalGrid,
    const std::array<Real, Rec::N_REC_COEFFICIENTS>& perturbedCoefficients,
    const int i, const int j, const int k) {
