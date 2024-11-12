@@ -434,6 +434,12 @@ struct HallTermHelpers {
    }
 };
 
+// Add helper function to safely read from const grids
+template<typename T, int S>
+inline const std::array<T, S>& getGridElement(const FsGrid<std::array<T, S>, FS_STENCIL_WIDTH>& grid, int i, int j, int k) {
+   return const_cast<FsGrid<std::array<T, S>, FS_STENCIL_WIDTH>&>(grid).get(i, j, k)->at(0);
+}
+
 // Template for calculating Hall term components
 template<typename Component>
 void calculateEdgeHallTermComponents(
@@ -456,16 +462,16 @@ void calculateEdgeHallTermComponents(
          const Real invDy = 1.0 / technicalGrid.DY;
          const Real invDz = 1.0 / technicalGrid.DZ;
          
-         // Direct grid access since we removed const
-         const Real Bx = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBX) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBX);
-         const Real By = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBY) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBY);
-         const Real Bz = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBZ) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZ);
+         // Use helper function to read from const grids
+         const Real Bx = getGridElement(perBGrid, i, j, k).at(fsgrids::bfield::PERBX) + 
+                        getGridElement(BgBGrid, i, j, k).at(fsgrids::bgbfield::BGBX);
+         const Real By = getGridElement(perBGrid, i, j, k).at(fsgrids::bfield::PERBY) + 
+                        getGridElement(BgBGrid, i, j, k).at(fsgrids::bgbfield::BGBY);
+         const Real Bz = getGridElement(perBGrid, i, j, k).at(fsgrids::bfield::PERBZ) + 
+                        getGridElement(BgBGrid, i, j, k).at(fsgrids::bgbfield::BGBZ);
          
          const Real hallRhoq = HallTermHelpers::getHallRhoq(
-            momentsGrid.get(i,j,k)->at(fsgrids::moments::RHOQ));
+            getGridElement(momentsGrid, i, j, k).at(fsgrids::moments::RHOQ));
             
          Component::calculate(EHallGrid, Bx, By, Bz, invDx, invDy, invDz, hallRhoq);
          break;
@@ -513,7 +519,7 @@ void calculateHallTermSimple(
       dPerBGrid.updateGhostCells();
       
       #pragma omp section
-      if(P::ohmGradPeTerm == 0 && communicateMomentsDerivatives) {
+      if(Parameters::ohmGradPeTerm == 0 && communicateMomentsDerivatives) {
          if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
             dMomentsGrid.updateGhostCells();
          } else {
@@ -533,53 +539,6 @@ void calculateHallTermSimple(
             calculateEdgeHallTermComponents<JXBZ_000_001>(perBGrid, EHallGrid, momentsGrid, dPerBGrid, dMomentsGrid, BgBGrid, technicalGrid, perturbedCoefficients, i, j, k);
          }
       }
-   }
-}
-
-// Add helper functions to safely read from const grids
-template<typename T, int S>
-inline const std::array<T,S>* getGrid(const FsGrid<std::array<T,S>, FS_STENCIL_WIDTH>& grid, int i, int j, int k) {
-   // This is safe because we're only reading
-   return const_cast<FsGrid<std::array<T,S>, FS_STENCIL_WIDTH>&>(grid).get(i,j,k);
-}
-
-template<typename Component>
-void calculateEdgeHallTermComponents(
-   FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
-   FsGrid<std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH>& EHallGrid,
-   FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>& momentsGrid,
-   FsGrid<std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH>& dPerBGrid, 
-   FsGrid<std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH>& dMomentsGrid,
-   FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
-   const FsGrid<fsgrids::technical, FS_STENCIL_WIDTH>& technicalGrid,
-   const std::array<Real, Rec::N_REC_COEFFICIENTS>& perturbedCoefficients,
-   const int i, const int j, const int k) {
-   
-   switch(Parameters::ohmHallTerm) {
-      case 0:
-         return;
-         
-      case 1: {
-         const Real invDx = 1.0 / technicalGrid.DX;
-         const Real invDy = 1.0 / technicalGrid.DY;
-         const Real invDz = 1.0 / technicalGrid.DZ;
-         
-         // Use helper function to read from const grids
-         const Real Bx = getGrid(perBGrid, i,j,k)->at(fsgrids::bfield::PERBX) + 
-                        getGrid(BgBGrid, i,j,k)->at(fsgrids::bgbfield::BGBX);
-         const Real By = getGrid(perBGrid, i,j,k)->at(fsgrids::bfield::PERBY) + 
-                        getGrid(BgBGrid, i,j,k)->at(fsgrids::bgbfield::BGBY);
-         const Real Bz = getGrid(perBGrid, i,j,k)->at(fsgrids::bfield::PERBZ) + 
-                        getGrid(BgBGrid, i,j,k)->at(fsgrids::bgbfield::BGBZ);
-         
-         const Real hallRhoq = HallTermHelpers::getHallRhoq(
-            getGrid(momentsGrid, i,j,k)->at(fsgrids::moments::RHOQ));
-            
-         Component::calculate(EHallGrid, Bx, By, Bz, invDx, invDy, invDz, hallRhoq);
-         break;
-      }
-      
-      // ...existing code...
    }
 }
 
