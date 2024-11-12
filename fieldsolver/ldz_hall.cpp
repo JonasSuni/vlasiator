@@ -452,21 +452,20 @@ void calculateEdgeHallTermComponents(
          return;
          
       case 1: {
-         // Optimize case 1 with precomputed divisions
          const Real invDx = 1.0 / technicalGrid.DX;
          const Real invDy = 1.0 / technicalGrid.DY;
          const Real invDz = 1.0 / technicalGrid.DZ;
          
-         // Cache B field components
-         const Real Bx = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBX) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBX);
-         const Real By = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBY) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBY);
-         const Real Bz = perBGrid.get(i,j,k)->at(fsgrids::bfield::PERBZ) + 
-                        BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZ);
+         // Use const_cast here since get() is non-const but we know the access is read-only
+         const Real Bx = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBX) + 
+                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBX);
+         const Real By = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBY) + 
+                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBY);
+         const Real Bz = const_cast<FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>&>(perBGrid).get(i,j,k)->at(fsgrids::bfield::PERBZ) + 
+                        const_cast<FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>&>(BgBGrid).get(i,j,k)->at(fsgrids::bgbfield::BGBZ);
          
          const Real hallRhoq = HallTermHelpers::getHallRhoq(
-            momentsGrid.get(i,j,k)->at(fsgrids::moments::RHOQ));
+            const_cast<FsGrid<std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH>&>(momentsGrid).get(i,j,k)->at(fsgrids::moments::RHOQ));
             
          Component::calculate(EHallGrid, Bx, By, Bz, invDx, invDy, invDz, hallRhoq);
          break;
