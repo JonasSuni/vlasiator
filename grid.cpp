@@ -220,7 +220,7 @@ void initializeGrids(
          phiprof::Timer timer {"Restart refinement"};
          for (int i = 0; i < P::amrMaxSpatialRefLevel; ++i) {
             // (un)Refinement is done one level at a time so we don't blow up memory
-            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, i)) {
+            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, false, i)) { // firstPass = false so that we don't exit early
                cerr << "(MAIN) ERROR: Forcing refinement takes too much memory" << endl;
                exit(1);
             }
@@ -231,7 +231,7 @@ void initializeGrids(
          phiprof::Timer timer {"Restart refinement"};
          // Get good load balancing for refinement
          balanceLoad(mpiGrid, sysBoundaries, technicalGrid);
-         adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project);
+         adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, false); // firstPass = false so that we don't exit early
          balanceLoad(mpiGrid, sysBoundaries, technicalGrid);
       }
    }
@@ -1522,7 +1522,7 @@ void mapRefinement(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
    timer.stop();
 }
 
-bool adaptRefinement(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid, FsGrid<fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid, SysBoundary& sysBoundaries, Project& project, int useStatic) {
+bool adaptRefinement(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid, FsGrid<fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid, SysBoundary& sysBoundaries, Project& project, const bool firstPass, int useStatic) {
    phiprof::Timer amrTimer {"Re-refine spatial cells"};
    int refines {0};
    if (useStatic > -1) {
@@ -1583,7 +1583,7 @@ bool adaptRefinement(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGri
    MPI_Allreduce(&(globalflags::bailingOut), &bailout, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
    bailoutAllreduceTimer.stop();
 
-   if (bailout) {
+   if (bailout || firstPass) { // If projected HWM exceeds bailout threshold or we force it on first pass
       return false;
    }
 

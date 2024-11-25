@@ -1030,7 +1030,7 @@ int simulate(int argn,char* args[]) {
          if (refineNow || (!dtIsChanged && P::adaptRefinement && P::tstep % (P::rebalanceInterval * P::refineCadence) == 0 && P::t > P::refineAfter)) { 
             logFile << "(AMR): Adapting refinement!"  << endl << writeVerbose;
             refineNow = false;
-            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
+            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project, true)) { // firstPass = true so that we exit early and rebalance
                // OOM, rebalance and try again
                logFile << "(LB) AMR rebalancing with heavier refinement weights." << endl;
                globalflags::bailingOut = false; // Reset this
@@ -1047,7 +1047,7 @@ int simulate(int argn,char* args[]) {
                }
 
                mpiGrid.cancel_refining();
-               if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
+               if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project, false)) { // firstPass = false so that we actually attempt refinement
                   for (auto id : mpiGrid.get_local_cells_to_refine()) {
                      mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
                   }
