@@ -390,9 +390,7 @@ namespace SBC {
          }
       }
       
-      if (!copyMomentsOnly) { // Do this only if copyMomentsOnly is false.
-         to->set_population(from->get_population(popID), popID);
-      } else {
+      if(copyMomentsOnly) {
          if (copy_V_moments) {
             to->get_population(popID).RHO_V = from->get_population(popID).RHO_V;
          } else {
@@ -408,6 +406,8 @@ namespace SBC {
                to->get_population(popID).P_R[i] = from->get_population(popID).P_R[i];
             }
          }
+      } else {
+         to->set_population(from->get_population(popID), popID);
       }
    }
    
