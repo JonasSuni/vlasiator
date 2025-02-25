@@ -94,8 +94,7 @@ namespace projects {
       int Bydsign;
       int Bzusign;
       int Bzdsign;
-      
-      bool doConvertdHT;
+
       Real Shockwidth;
       Real AMR_L1width;
       Real AMR_L2width;
