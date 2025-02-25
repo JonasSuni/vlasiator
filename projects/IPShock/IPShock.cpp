@@ -288,24 +288,24 @@ namespace projects {
          Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
       } else {
          if (this->Shockwidth > 1e-5) {
-            DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
-            hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
-            hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
-            hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
-            TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
+            Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+            Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
+            Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
+            Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
+            Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
          } else {
             if (x > 0) {
-               DENSITY = sP.DENSITYu;
-               hereVX = sP.V0u[0];
-               hereVY = sP.V0u[1];
-               hereVZ = sP.V0u[2];
-               TEMPERATURE = sP.TEMPERATUREu;
+               Real DENSITY = sP.DENSITYu;
+               Real hereVX = sP.V0u[0];
+               Real hereVY = sP.V0u[1];
+               Real hereVZ = sP.V0u[2];
+               Real TEMPERATURE = sP.TEMPERATUREu;
             } else {
-               DENSITY = sP.DENSITYd;
-               hereVX = sP.V0d[0];
-               hereVY = sP.V0d[1];
-               hereVZ = sP.V0d[2];
-               TEMPERATURE = sP.TEMPERATUREd;
+               Real DENSITY = sP.DENSITYd;
+               Real hereVX = sP.V0d[0];
+               Real hereVY = sP.V0d[1];
+               Real hereVZ = sP.V0d[2];
+               Real TEMPERATURE = sP.TEMPERATUREd;
             }
          }
       }
@@ -384,24 +384,24 @@ namespace projects {
          Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
       } else {
          if (this->Shockwidth > 1e-5) {
-            DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
-            hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
-            hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
-            hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
-            TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
+            Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+            Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
+            Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
+            Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
+            Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
          } else {
             if (x > 0) {
-               DENSITY = sP.DENSITYu;
-               hereVX = sP.V0u[0];
-               hereVY = sP.V0u[1];
-               hereVZ = sP.V0u[2];
-               TEMPERATURE = sP.TEMPERATUREu;
+               Real DENSITY = sP.DENSITYu;
+               Real hereVX = sP.V0u[0];
+               Real hereVY = sP.V0u[1];
+               Real hereVZ = sP.V0u[2];
+               Real TEMPERATURE = sP.TEMPERATUREu;
             } else {
-               DENSITY = sP.DENSITYd;
-               hereVX = sP.V0d[0];
-               hereVY = sP.V0d[1];
-               hereVZ = sP.V0d[2];
-               TEMPERATURE = sP.TEMPERATUREd;
+               Real DENSITY = sP.DENSITYd;
+               Real hereVX = sP.V0d[0];
+               Real hereVY = sP.V0d[1];
+               Real hereVZ = sP.V0d[2];
+               Real TEMPERATURE = sP.TEMPERATUREd;
             }
          }
       }
