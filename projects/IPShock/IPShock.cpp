@@ -569,8 +569,8 @@ namespace projects {
                         std::array<Real, fsgrids::bfield::N_BFIELD>* cell = perBGrid.get(x, y, z);
                   
                         Real BX = interpolate(this->B0u[0], this->B0d[0], xyz[0]);
-                        Real BY = interpolate(this->B0u[1], this->B0d[1], xyz[1]);
-                        Real BZ = interpolate(this->B0u[2], this->B0d[2], xyz[2]);
+                        Real BY = interpolate(this->B0u[1], this->B0d[1], xyz[0]);
+                        Real BZ = interpolate(this->B0u[2], this->B0d[2], xyz[0]);
 
                         cell->at(fsgrids::bfield::PERBX) = BX;
                         cell->at(fsgrids::bfield::PERBY) = BY;
