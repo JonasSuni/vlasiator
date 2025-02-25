@@ -259,17 +259,23 @@ namespace projects {
       const Real x  = cell->parameters[CellParams::XCRD] + 0.5*cell->parameters[CellParams::DX];
       const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
       const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
+      
+      Real DENSITY;
+      Real hereVX;
+      Real hereVY;
+      Real hereVZ;
+      Real TEMPERATURE;
 
       if (this->doConvertdHT) {
          // Interpolate density between upstream and downstream
          // All other values are calculated from jump conditions
-         Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+         DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
          if (DENSITY < 1e-20) {
             std::cout<<"density too low! "<<DENSITY<<" x "<<x<<" y "<<y<<" z "<<z<<std::endl;
          }
       
          // Solve tangential components for B and V
-         Real hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
+         hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
          Real hereBX = this->B0u[0];
          Real MAsq = std::pow((sP.V0u[0]/this->B0u[0]), 2) * sP.DENSITYu * mass * mu0;
          Real hereBtang = this->B0u[2] * (MAsq - 1.0)/(MAsq*hereVX/sP.V0u[0] -1.0);
@@ -278,34 +284,34 @@ namespace projects {
          /* Reconstruct Y and Z components using cos(phi) values and signs. Tangential variables are always positive. */
          //Real hereBY = hereBtang * this->Bucosphi * this->Byusign;
          //Real hereBZ = hereBtang * sqrt(1. - this->Bucosphi * this->Bucosphi) * this->Bzusign;
-         Real hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
-         Real hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
+         hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
+         hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
 
          // Old incorrect temperature - just interpolate for now
          //Real adiab = 5./3.;
          //Real TEMPERATURE = this->TEMPERATUREu + (mass*(adiab-1.0)/(2.0*KB*adiab)) * 
          //  ( std::pow(this->V0u[0],2) + std::pow(this->V0u[2],2) - std::pow(hereVX,2) - std::pow(hereVZ,2) );
-         Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
+         TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
       } else {
          if (this->Shockwidth > 1e-5) {
-            Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
-            Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
-            Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
-            Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
-            Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
+            DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+            hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
+            hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
+            hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
+            TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
          } else {
             if (x > 0) {
-               Real DENSITY = sP.DENSITYu;
-               Real hereVX = sP.V0u[0];
-               Real hereVY = sP.V0u[1];
-               Real hereVZ = sP.V0u[2];
-               Real TEMPERATURE = sP.TEMPERATUREu;
+               DENSITY = sP.DENSITYu;
+               hereVX = sP.V0u[0];
+               hereVY = sP.V0u[1];
+               hereVZ = sP.V0u[2];
+               TEMPERATURE = sP.TEMPERATUREu;
             } else {
-               Real DENSITY = sP.DENSITYd;
-               Real hereVX = sP.V0d[0];
-               Real hereVY = sP.V0d[1];
-               Real hereVZ = sP.V0d[2];
-               Real TEMPERATURE = sP.TEMPERATUREd;
+               DENSITY = sP.DENSITYd;
+               hereVX = sP.V0d[0];
+               hereVY = sP.V0d[1];
+               hereVZ = sP.V0d[2];
+               TEMPERATURE = sP.TEMPERATUREd;
             }
          }
       }
@@ -369,39 +375,45 @@ namespace projects {
       const Real mu0 = physicalconstants::MU_0;
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
 
+      Real DENSITY;
+      Real hereVX;
+      Real hereVY;
+      Real hereVZ;
+      Real TEMPERATURE;
+
       if (this->doConvertdHT) {
-         Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+         DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
          if (DENSITY < 1e-20) {
             std::cout<<"density too low! "<<DENSITY<<" x "<<x<<" y "<<y<<" z "<<z<<std::endl;
          }
-         Real hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
+         hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
          Real hereBX = this->B0u[0];
          Real MAsq = std::pow((sP.V0u[0]/this->B0u[0]), 2) * sP.DENSITYu * mass * mu0;
          Real hereBtang = this->B0u[2] * (MAsq - 1.0)/(MAsq*hereVX/sP.V0u[0] -1.0);
          Real hereVtang = hereVX * hereBtang / hereBX;
-         Real hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
-         Real hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
-         Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
+         hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
+         hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
+         TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
       } else {
          if (this->Shockwidth > 1e-5) {
-            Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
-            Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
-            Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
-            Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
-            Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
+            DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+            hereVX = interpolate(sP.V0u[0], sP.V0d[0], x);
+            hereVY = interpolate(sP.V0u[1], sP.V0d[1], x);
+            hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x);
+            TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x);
          } else {
             if (x > 0) {
-               Real DENSITY = sP.DENSITYu;
-               Real hereVX = sP.V0u[0];
-               Real hereVY = sP.V0u[1];
-               Real hereVZ = sP.V0u[2];
-               Real TEMPERATURE = sP.TEMPERATUREu;
+               DENSITY = sP.DENSITYu;
+               hereVX = sP.V0u[0];
+               hereVY = sP.V0u[1];
+               hereVZ = sP.V0u[2];
+               TEMPERATURE = sP.TEMPERATUREu;
             } else {
-               Real DENSITY = sP.DENSITYd;
-               Real hereVX = sP.V0d[0];
-               Real hereVY = sP.V0d[1];
-               Real hereVZ = sP.V0d[2];
-               Real TEMPERATURE = sP.TEMPERATUREd;
+               DENSITY = sP.DENSITYd;
+               hereVX = sP.V0d[0];
+               hereVY = sP.V0d[1];
+               hereVZ = sP.V0d[2];
+               TEMPERATURE = sP.TEMPERATUREd;
             }
          }
       }
