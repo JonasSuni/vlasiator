@@ -107,7 +107,7 @@ vector<pair<string, string>> P::restartReadHints;
 Real P::saveRestartWalltimeInterval = -1.0;
 uint P::saveRecoverTstepInterval = 0;
 uint P::exitAfterRestarts = numeric_limits<uint>::max();
-uint P::recoverFileCount = 0;
+uint P::recoverMaxFiles = 0;
 uint64_t P::vlsvBufferSize = 0;
 int P::restartStripeFactor = 0;
 int P::systemStripeFactor = 0;
@@ -268,7 +268,7 @@ bool P::addParameters() {
            numeric_limits<uint>::max());
    RP::add("io.recover_tstep_interval",
            "Save the complete simulation in given tstep intervals. 0 disables writes.", 0);
-   RP::add("io.number_of_recovers", "Overwrite recovers cyclically after this number of recovers written.", 0);
+   RP::add("io.number_of_recovers", "Overwrite recovers cyclically after this number of recovers written.", 2);
    RP::add("io.vlsv_buffer_size",
            "Buffer size passed to VLSV writer (bytes, up to uint64_t), default 0 as this is sensible on sisu", 0);
    RP::add("io.write_restart_stripe_factor", "Stripe factor for restart and initial grid writing. Default 0 to inherit.", 0);
@@ -567,7 +567,7 @@ void Parameters::getParameters() {
    RP::get("io.restart_walltime_interval", P::saveRestartWalltimeInterval);
    RP::get("io.recover_tstep_interval", P::saveRecoverTstepInterval);
    RP::get("io.number_of_restarts", P::exitAfterRestarts);
-   RP::get("io.number_of_recovers", P::recoverFileCount);
+   RP::get("io.number_of_recovers", P::recoverMaxFiles);
    RP::get("io.vlsv_buffer_size", P::vlsvBufferSize);
    RP::get("io.write_restart_stripe_factor", P::restartStripeFactor);
    RP::get("io.write_system_stripe_factor", P::systemStripeFactor);
@@ -592,6 +592,9 @@ void Parameters::getParameters() {
               << endl;
       }
       P::recoverWritePath = prefix;
+   }
+   if (P::recoverMaxFiles == 0) {
+      P::recoverMaxFiles = 1; // If we leave it at zero a manual DORC will divide by zero when computing the index.
    }
    size_t maxSize = 0;
    maxSize = max(maxSize, P::systemWriteTimeInterval.size());
