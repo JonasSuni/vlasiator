@@ -54,7 +54,6 @@ namespace SBC {
       Real rho;
       Real V0[3];
       Real T;
-      Real fluffiness;
    };
 
    enum IonosphereBoundaryVDFmode { // How are inner boundary VDFs constructed from the ionosphere
@@ -395,6 +394,10 @@ namespace SBC {
          const uint popID,
          const bool calculate_V_moments
       ) override;
+      virtual void setupL2OutflowAtRestart(
+         dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>& mpiGrid
+      ) override {std::cerr << "ERROR: Ionosphere::setupL2OutflowAtRestart called!" << std::endl;}
+
       virtual void updateState(
          dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>& mpiGrid,
          FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
