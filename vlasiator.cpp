@@ -1099,8 +1099,7 @@ int simulate(int argn,char* args[]) {
 
             if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
                // OOM, rebalance and try again
-               logFile << "(LB) AMR rebalancing with heavier refinement weights." << endl;
-               logFile.flush();
+               logFile << "(LB) AMR rebalancing with heavier refinement weights." << endl << write;
                addTimedBarrier("barrier-amr-rebalance-heavier");
                globalflags::bailingOut = false; // Reset this
                for (auto id : mpiGrid.get_local_cells_to_refine()) {
