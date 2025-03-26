@@ -1105,6 +1105,9 @@ int simulate(int argn,char* args[]) {
                for (auto id : mpiGrid.get_local_cells_to_refine()) {
                   mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
                }
+               for (auto id : mpiGrid.get_local_cells_to_unrefine()) {
+                  mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 1.25;
+               }
                balanceLoad(mpiGrid, sysBoundaryContainer, technicalGrid);
                // We can /= 8.0 now as cells have potentially migrated. Go back to block-based count for now.
                for (auto id : mpiGrid.get_local_cells_to_refine()) {
@@ -1118,6 +1121,9 @@ int simulate(int argn,char* args[]) {
                if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
                   for (auto id : mpiGrid.get_local_cells_to_refine()) {
                      mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
+                  }
+                  for (auto id : mpiGrid.get_local_cells_to_unrefine()) {
+                     mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 1.25;
                   }
                   continue;   // Refinement failed and we're bailing out
                } else {
