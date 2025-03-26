@@ -1301,8 +1301,9 @@ bool adaptRefinement(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGri
 
    // Rougher estimate than above
    // Unrefined cells have a transitive memory footprint since parent and children exist at same time
+   // Added a bit of safety overhead
    for (auto id : mpiGrid.get_local_cells_to_unrefine()) {
-      newBytes += mpiGrid[id]->get_cell_memory_capacity();
+      newBytes += 1.25 * mpiGrid[id]->get_cell_memory_capacity();
    }
 
    report_memory_consumption(mpiGrid, newBytes);
