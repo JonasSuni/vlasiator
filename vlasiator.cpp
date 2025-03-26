@@ -1099,14 +1099,15 @@ int simulate(int argn,char* args[]) {
 
             if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
                // OOM, rebalance and try again
-               addTimedBarrier("barrier-amr-rebalance-heavier");
                logFile << "(LB) AMR rebalancing with heavier refinement weights." << endl;
+               logFile.flush();
+               addTimedBarrier("barrier-amr-rebalance-heavier");
                globalflags::bailingOut = false; // Reset this
                for (auto id : mpiGrid.get_local_cells_to_refine()) {
                   mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
                }
                for (auto id : mpiGrid.get_local_cells_to_unrefine()) {
-                  mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 1.25;
+                  mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 2.0;
                }
                balanceLoad(mpiGrid, sysBoundaryContainer, technicalGrid);
                // We can /= 8.0 now as cells have potentially migrated. Go back to block-based count for now.
@@ -1123,7 +1124,7 @@ int simulate(int argn,char* args[]) {
                      mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
                   }
                   for (auto id : mpiGrid.get_local_cells_to_unrefine()) {
-                     mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 1.25;
+                     mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 2.0;
                   }
                   continue;   // Refinement failed and we're bailing out
                } else {
