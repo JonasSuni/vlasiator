@@ -223,7 +223,7 @@ void initializeGrids(
          phiprof::Timer timer {"Restart refinement"};
          for (int i = 0; i < P::amrMaxSpatialRefLevel; ++i) {
             // (un)Refinement is done one level at a time so we don't blow up memory
-            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, i)) {
+            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, false, i)) {
                cerr << "(MAIN) ERROR: Forcing refinement takes too much memory" << endl;
                exit(1);
             }
@@ -234,7 +234,7 @@ void initializeGrids(
          phiprof::Timer timer {"Restart refinement"};
          // Get good load balancing for refinement
          balanceLoad(mpiGrid, sysBoundaries, technicalGrid);
-         adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project);
+         adaptRefinement(mpiGrid, technicalGrid, sysBoundaries, project, false);
          balanceLoad(mpiGrid, sysBoundaries, technicalGrid);
       }
    }

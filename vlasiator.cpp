@@ -1118,7 +1118,7 @@ int simulate(int argn,char* args[]) {
                }
 
                mpiGrid.cancel_refining();
-               if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project)) {
+               if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project, false)) {
                   for (auto id : mpiGrid.get_local_cells_to_refine()) {
                      mpiGrid[id]->parameters[CellParams::LBWEIGHTCOUNTER] *= 8.0;
                   }
