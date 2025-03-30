@@ -1097,7 +1097,7 @@ int simulate(int argn,char* args[]) {
             logFile << "(AMR): Adapting refinement!"  << endl << writeVerbose;
             refineNow = false;
 
-            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project, true)) {
+            if (!adaptRefinement(mpiGrid, technicalGrid, sysBoundaryContainer, *project, false)) {
                // OOM, rebalance and try again
                logFile << "(LB) AMR rebalancing with heavier refinement weights." << endl << write;
                addTimedBarrier("barrier-amr-rebalance-heavier");
