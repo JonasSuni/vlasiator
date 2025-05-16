@@ -28,7 +28,7 @@
                 "USE_JEMALLOC",
                 "JEMALLOC_NO_DEMANGLE"
             ],
-            "compilerPath": "/appl/easybuild/opt/OpenMPI/4.1.1-GCC-11.2.0/bin/mpic++",
+            "compilerPath": "",
             "cStandard": "c17",
             "intelliSenseMode": "linux-gcc-x64",
             "cppStandard": "c++17"
