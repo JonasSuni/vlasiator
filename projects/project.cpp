@@ -32,8 +32,6 @@
 
 #include "Alfven/Alfven.h"
 #include "CircularAlfven/CircularAlfven.h"
-//#include "CircularAlfven/CircularAlfven.h"
-//#include "MultiCircularAlfven/MultiCircularAlfven.h"
 #include "Diffusion/Diffusion.h"
 #include "Dispersion/Dispersion.h"
 #include "Distributions/Distributions.h"
