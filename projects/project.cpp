@@ -31,7 +31,7 @@
 #include "../velocity_mesh_parameters.h"
 
 #include "Alfven/Alfven.h"
-#include "AlfvenCascade/AlfvenCascade.h"
+#include "CircularAlfven/CircularAlfven.h"
 //#include "CircularAlfven/CircularAlfven.h"
 //#include "MultiCircularAlfven/MultiCircularAlfven.h"
 #include "Diffusion/Diffusion.h"
@@ -664,7 +664,7 @@ Project* createProject() {
       rvalue = new projects::Alfven;
    }
    if(Parameters::projectName == "CircularAlfven") {
-      rvalue = new projects::AlfvenCascade;
+      rvalue = new projects::CircularAlfven;
    }
    if(Parameters::projectName == "Diffusion") {
       rvalue = new projects::Diffusion;
