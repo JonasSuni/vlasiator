@@ -79,9 +79,7 @@ namespace projects {
       typedef Readparameters RP;
       // TODO add all projects' static addParameters() functions here.
       projects::Alfven::addParameters();
-      projects::AlfvenCascade::addParameters();
-      // projects::CircularAlfven::addParameters();
-      // projects::MultiCircularAlfven::addParameters();
+      projects::CircularAlfven::addParameters();
       projects::Diffusion::addParameters();
       projects::Dispersion::addParameters();
       projects::Distributions::addParameters();
@@ -665,7 +663,7 @@ Project* createProject() {
    if(Parameters::projectName == "Alfven") {
       rvalue = new projects::Alfven;
    }
-   if(Parameters::projectName == "AlfvenCascade") {
+   if(Parameters::projectName == "CircularAlfven") {
       rvalue = new projects::AlfvenCascade;
    }
    if(Parameters::projectName == "Diffusion") {

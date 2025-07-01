@@ -32,15 +32,15 @@
 #include "../../object_wrapper.h"
 #include "../../readparameters.h"
 
-#include "AlfvenCascade.h"
+#include "CircularAlfven.h"
 
 using namespace spatial_cell;
 
 namespace projects {
-AlfvenCascade::AlfvenCascade() : Project() {}
-AlfvenCascade::~AlfvenCascade() {}
+CircularAlfven::CircularAlfven() : Project() {}
+CircularAlfven::~CircularAlfven() {}
 
-bool AlfvenCascade::initialize(void) {
+bool CircularAlfven::initialize(void) {
    bool success = Project::initialize();
 
    creal m = physicalconstants::MASS_PROTON;
@@ -50,21 +50,9 @@ bool AlfvenCascade::initialize(void) {
    creal mu0 = physicalconstants::MU_0;
 
    rho0 = m * n0; // Mass density
-   p0 = n0 * kB * T; // pressure
-
-   std::vector<WaveParameters> waves;
-   // Initialize waves based on parameters
-   waves.clear();
-   for (int idx = 0; idx < nWaves; idx++) {
-       WaveParameters wave;
-       wave.wavelength = wavelength.at(idx);
-       wave.amplitude = amplitude.at(idx);
-       wave.phase = phase.at(idx);
-       waves.push_back(wave);
-   }
 
    // Calculate Alfvén speed
-   VA = B / sqrt(mu0 * rho0);
+   VA = B0 / sqrt(mu0 * rho0);
 
    if (verbose) {
       int myRank;
@@ -72,15 +60,15 @@ bool AlfvenCascade::initialize(void) {
       if (myRank == MASTER_RANK) {
          std::cout << "Initialized multi-wave turbulence simulation\n";
          std::cout << "Number of waves: " << nWaves << "\n";
-         std::cout << "Background field strength: " << B << " T\n";
+         std::cout << "Background field strength: " << B0 << " T\n";
          std::cout << "Alfvén speed: " << VA << " m/s\n";
+         std::cout << "Angle: " << angle << " degrees\n";
          
          for (int idx = 0; idx < nWaves; idx++) {
              std::cout << "\nWave " << idx + 1 << ":\n";
              std::cout << "Wavelength: " << wavelength.at(idx) << " m\n";
              std::cout << "Amplitude: " << amplitude.at(idx) << " m/s\n";
-             std::cout << "Phase: " << phase.at(idx) << " rad\n";
-             std::cout << "Angle: " << angle * 180/M_PI << " degrees\n";
+             std::cout << "Phase: " << phase.at(idx) << " degrees\n";
          }
       }
    }
@@ -88,85 +76,60 @@ bool AlfvenCascade::initialize(void) {
    return success;
 }
 
-void AlfvenCascade::addParameters() {
+void CircularAlfven::addParameters() {
    typedef Readparameters RP;
    
-   RP::add("AlfvenCascade.numberOfWaves", "Number of waves in the simulation", 1);
+   RP::add("CircularAlfven.numberOfWaves", "Number of waves in the simulation", 1);
 
-   RP::addComposing("AlfvenCascade.wavelength", "Wavelength of wave (m)");
-   RP::addComposing("AlfvenCascade.amplitude", "Velocity amplitude (m/s)");
-   RP::addComposing("AlfvenCascade.phase", "Initial phase (rad)");
+   RP::addComposing("CircularAlfven.wavelength", "Wavelength of wave (m)");
+   RP::addComposing("CircularAlfven.amplitude", "Velocity amplitude (m/s)");
+   RP::addComposing("CircularAlfven.phase", "Initial phase (degrees)");
    
    
-   RP::add("AlfvenCascade.n0", "Background density (1/m^3)", 1e6);
-   RP::add("AlfvenCascade.B", "Background magnetic field strength (T)", 1e-8);
-   RP::add("AlfvenCascade.T", "Temperature (K)", 1e6);
-   RP::add("AlfvenCascade.spectralIndex", "Power law index for initial spectrum", -5.0/3.0);
-   RP::add("AlfvenCascade.randomSeed", "Seed for random phase generation", 12345);
-   RP::add("AlfvenCascade.verbose", "Verbose output", 1);
-   RP::add("AlfvenCascade.angle", "Wave angle (rad)",0.0);
+   RP::add("CircularAlfven.n0", "Background density (1/m^3)", 1e6);
+   RP::add("CircularAlfven.B0", "Background magnetic field strength (T)", 1e-8);
+   RP::add("CircularAlfven.T0", "Temperature (K)", 1e6);
+   RP::add("CircularAlfven.verbose", "Verbose output", 1);
+   RP::add("CircularAlfven.angle", "Wave angle (degrees)",0.0);
 }
 
-void AlfvenCascade::getParameters() {
+void CircularAlfven::getParameters() {
    typedef Readparameters RP;
    Project::getParameters();
 
-   RP::get("AlfvenCascade.numberOfWaves", nWaves);
+   RP::get("CircularAlfven.numberOfWaves", nWaves);
 
-   RP::get("AlfvenCascade.wavelength", wavelength);
-   RP::get("AlfvenCascade.amplitude", amplitude);
-   RP::get("AlfvenCascade.phase", phase);
+   RP::get("CircularAlfven.wavelength", wavelength);
+   RP::get("CircularAlfven.amplitude", amplitude);
+   RP::get("CircularAlfven.phase", phase);
 
    // We need the correct number of parameters for the waves
    if(   nWaves != (int)wavelength.size()
       || nWaves != (int)amplitude.size()
       || nWaves != (int)phase.size()
    ) {
-      cerr << "AlfvenCascade.numberOfWaves is set to " << nWaves << " so the same number of values is required for AlfvenCascade.wavelength, AlfvenCascade.amplitude, AlfvenCascade.phase" << endl;
+      cerr << "CircularAlfven.numberOfWaves is set to " << nWaves << " so the same number of values is required for CircularAlfven.wavelength, CircularAlfven.amplitude, CircularAlfven.phase" << endl;
       MPI_Abort(MPI_COMM_WORLD, 1);
    }
 
    // Get scalar parameters
-   RP::get("AlfvenCascade.n0", n0);
-   RP::get("AlfvenCascade.B", B);
-   RP::get("AlfvenCascade.T", T);
-   RP::get("AlfvenCascade.spectralIndex", spectralIndex);
-   RP::get("AlfvenCascade.randomSeed", randomSeed);
-   RP::get("AlfvenCascade.verbose", verbose);
-   RP::get("AlfvenCascade.angle", angle);
+   RP::get("CircularAlfven.n0", n0);
+   RP::get("CircularAlfven.B0", B0);
+   RP::get("CircularAlfven.T0", T0);
+   RP::get("CircularAlfven.verbose", verbose);
+   RP::get("CircularAlfven.angle", angle);
 }
 
-// std::vector<std::array<Real, 3>> AlfvenCascade::getV0(creal x, creal y, creal z, const uint popID) const {
-//    std::vector<std::array<Real, 3>> V0;
-//    std::array<Real, 3> v = {{0.0, 0.0, 0.0}};
-//    V0.push_back(v);
-//    return V0;
-// }
+void CircularAlfven::calcCellParameters(spatial_cell::SpatialCell* cell, creal& t) {}
 
-void AlfvenCascade::calcCellParameters(spatial_cell::SpatialCell* cell, creal& t) {}
-
-Realf AlfvenCascade::fillPhaseSpace(spatial_cell::SpatialCell *cell,
+Realf CircularAlfven::fillPhaseSpace(spatial_cell::SpatialCell *cell,
                                        const uint popID,
                                        const uint nRequested
       ) const {
-      // const AlfvenSpeciesParameters& sP = this->speciesParams[popID];
 
       // Fetch spatial cell center coordinates
       const Real x  = cell->parameters[CellParams::XCRD] + 0.5*cell->parameters[CellParams::DX];
       const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
-      // const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
-
-      // creal mass = getObjectWrapper().particleSpecies[popID].mass;
-      // creal mu0 = physicalconstants::MU_0;
-      // creal ALFVEN_VEL = this->B0 / sqrt(mu0 * sP.rho * mass);
-
-      // creal ksi = (x * cos(this->ALPHA) + y * sin(this->ALPHA)) / this->WAVELENGTH;
-      // creal initV0X = sP.A_VEL * ALFVEN_VEL * sin(this->ALPHA) * sin(2.0 * M_PI * ksi);
-      // creal initV0Y = - sP.A_VEL * ALFVEN_VEL * cos(this->ALPHA) * sin(2.0 * M_PI * ksi);
-      // creal initV0Z = - sP.A_VEL * ALFVEN_VEL * cos(2.0 * M_PI * ksi);
-
-      // Real initRho = sP.rho;
-      // Real initT = sP.T;
 
       creal mass = physicalconstants::MASS_PROTON;
       creal mu0 = physicalconstants::MU_0;
@@ -178,8 +141,8 @@ Realf AlfvenCascade::fillPhaseSpace(spatial_cell::SpatialCell *cell,
          Real kwave = 2 * M_PI / wavelength.at(idx);
          Real xpar = x * cosalpha + y * sinalpha;
          
-         Real uperp = amplitude.at(idx) * sin(kwave * xpar + phase.at(idx));
-         Real upara = amplitude.at(idx) * cos(kwave * xpar + phase.at(idx));
+         Real uperp = amplitude.at(idx) * sin(kwave * xpar + phase.at(idx) * M_PI / 180);
+         Real upara = amplitude.at(idx) * cos(kwave * xpar + phase.at(idx) * M_PI / 180);
          
          ux += -uperp * sinalpha;
          uy += uperp * cosalpha;
@@ -190,9 +153,7 @@ Realf AlfvenCascade::fillPhaseSpace(spatial_cell::SpatialCell *cell,
       creal initV0Z = uz;
 
       Real initRho = n0;
-      Real initT = T;
-
-      // std::cout << "initV0X " << initV0X << " initV0Y " << initV0Y << " initV0Z " << initV0Z << " initT " << initT << " initRho " << initRho << " mass " << mass << std::endl;
+      Real initT = T0;
 
       #ifdef USE_GPU
       vmesh::VelocityMesh *vmesh = cell->dev_get_velocity_mesh(popID);
@@ -230,12 +191,12 @@ Realf AlfvenCascade::fillPhaseSpace(spatial_cell::SpatialCell *cell,
       return rhosum;
    }
 
-void AlfvenCascade::setProjectBField(FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
+void CircularAlfven::setProjectBField(FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
                                     FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
                                     FsGrid<fsgrids::technical, FS_STENCIL_WIDTH>& technicalGrid) {
    // Set background field
    ConstantField bgField;
-   bgField.initialize(B*cos(angle), B*sin(angle), 0.0); // Background field according to angle
+   bgField.initialize(B0*cos(angle), B0*sin(angle), 0.0); // Set background field according to angle
    setBackgroundField(bgField, BgBGrid);
 
    if (!P::isRestart) {
@@ -260,10 +221,10 @@ void AlfvenCascade::setProjectBField(FsGrid<std::array<Real, fsgrids::bfield::N_
                    Real xpar = x[0] * cosalpha + x[1] * sinalpha;
 
                    // Calculate B1 from v1 using Alfvén wave relation
-                   Real B1 = std::pow(-1.0,idx) * amplitude.at(idx) * sqrt(mu0 * rho0);
+                   Real B1 = amplitude.at(idx) * sqrt(mu0 * rho0);
 
-                   Real Bperp = B1 * sin(kwave * xpar + phase.at(idx));
-                   Real Bpara = B1 * cos(kwave * xpar + phase.at(idx));
+                   Real Bperp = B1 * sin(kwave * xpar + phase.at(idx) * M_PI / 180);
+                   Real Bpara = B1 * cos(kwave * xpar + phase.at(idx) * M_PI / 180);
                    
                    Bx += -Bperp * sinalpha;
                    By += Bperp * cosalpha;

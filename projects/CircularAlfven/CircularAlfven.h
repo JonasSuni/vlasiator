@@ -20,24 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ALFVENCASCADE_H
-#define ALFVENCASCADE_H
+#ifndef CIRCULARALFVEN_H
+#define CIRCULARALFVEN_H
 
 #include "../../definitions.h"
 #include "../project.h"
 
 namespace projects {
 
-   struct WaveParameters {
-      Real wavelength;
-      Real amplitude;
-      Real phase;
-   };
-
-   class AlfvenCascade : public Project {
+   class CircularAlfven : public Project {
    public:
-      AlfvenCascade();
-      virtual ~AlfvenCascade();
+      CircularAlfven();
+      virtual ~CircularAlfven();
 
       virtual bool initialize(void);
       static void addParameters(void);
@@ -49,31 +43,24 @@ namespace projects {
                                     const uint popID,
                                     const uint nRequested) const override;
       virtual void calcCellParameters(spatial_cell::SpatialCell* cell, creal& t);
-      // virtual std::vector<std::array<Real, 3>> getV0(creal x, creal y, creal z, const uint popID) const;
       
 
       // Basic plasma parameters
       Real rho0;    // Background mass density
-      Real T;       // Temperature
-      Real B;       // Background magnetic field strength
-      Real p0;      // Thermal pressure
+      Real T0;       // Temperature
+      Real B0;       // Background magnetic field strength
       Real n0;       // Background number density
       Real VA;      // Alfvén speed
       Real angle;   // Wave vector angle
-      Real m;       // Particle mass
 
       // Turbulence parameters
       int nWaves; // Number of waves in simulation
       std::vector<Real> wavelength;  // Vector of wavelengths
       std::vector<Real> amplitude;   // Vector of velocity amplitudes
       std::vector<Real> phase;       // Vector of initial phases
-      
-      Real spectralIndex;            // Power law index for initial spectrum
-      int randomSeed;               // Seed for random phase generation
 
       bool verbose;
-      std::vector<WaveParameters> waves;
-   }; // class AlfvenCascade
+   }; // class CircularAlfven
 } // namespace projects
 
 #endif
