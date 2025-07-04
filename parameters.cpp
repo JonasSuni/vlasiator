@@ -213,6 +213,8 @@ int P::PADmubins;
 string P::PADnu0 = string("");
 Realf P::PADfudge;
 
+Real P::dJdt_coeff = 0.0;
+
 std::array<FsGridTools::Task_t,3> P::manualFsGridDecomposition = {0,0,0};
 std::array<FsGridTools::Task_t,3> P::overrideReadFsGridDecomposition = {0,0,0};
 
@@ -384,6 +386,9 @@ bool P::addParameters() {
    RP::add(
        "fieldsolver.manualFsGridDecompositionZ",
        "Manual FsGridDecomposition for field solver grid.", 0);
+   RP::add(
+      "fieldsolver.dJdt",
+      "Coefficient for dJ/dt term in Ohm's law. If <= 0, disable term.", 0);
 
 
    // Vlasov solver parameters
@@ -1017,6 +1022,7 @@ void Parameters::getParameters() {
    RP::get("fieldsolver.electronPTindex", P::electronPTindex); // Polytropic index for solving electron equation of state to use in eGradPe term
    RP::get("fieldsolver.maxCFL", P::fieldSolverMaxCFL);
    RP::get("fieldsolver.minCFL", P::fieldSolverMinCFL);
+   RP::get("fieldsolver.dJdt", P::dJdt_coeff);
 
    // manual FsGrid decomposition should be complete with three values. If at least one is set but all are not set, abort
    if ((RP::isSet("fieldsolver.manualFsGridDecompositionX")||RP::isSet("fieldsolver.manualFsGridDecompositionY")||RP::isSet("fieldsolver.manualFsGridDecompositionZ")) &&

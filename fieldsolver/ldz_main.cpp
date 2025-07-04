@@ -106,6 +106,8 @@ bool propagateFields(
          }
       }
    }
+
+   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldGrid = dPerBGrid;
    
    
    if (subcycles == 1) {
@@ -143,6 +145,7 @@ bool propagateFields(
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
+         dPerBOldGrid,
          dMomentsGrid,
          dMomentsDt2Grid,
          BgBGrid,
@@ -151,6 +154,9 @@ bool propagateFields(
          RK_ORDER1,
          true // communicateEGradPeOrMomentsDerivatives
       );
+      if (Parameters::dJdt_coeff > 0) {
+         dPerBOldGrid.copyData(dPerBGrid);
+      }
       #else
       propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, dt, RK_ORDER2_STEP1);
       calculateDerivativesSimple(perBGrid, perBDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dMomentsGrid, dMomentsDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1, true/*doMoments*/);
@@ -185,6 +191,7 @@ bool propagateFields(
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
+         dPerBOldGrid,
          dMomentsGrid,
          dMomentsDt2Grid,
          BgBGrid,
@@ -193,7 +200,9 @@ bool propagateFields(
          RK_ORDER2_STEP1,
          true // communicateEGradPeOrMomentsDerivatives
       );
-      
+      if (Parameters::dJdt_coeff > 0) {
+         dPerBOldGrid.copyData(dPerBGrid);
+      }
       propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, dt, RK_ORDER2_STEP2);
       calculateDerivativesSimple(perBGrid, perBDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dMomentsGrid, dMomentsDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2, true/*doMoments*/);
       if(P::ohmGradPeTerm > 0) {
@@ -227,6 +236,7 @@ bool propagateFields(
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
+         dPerBOldGrid,
          dMomentsGrid,
          dMomentsDt2Grid,
          BgBGrid,
@@ -235,6 +245,9 @@ bool propagateFields(
          RK_ORDER2_STEP2,
          true // communicateEGradPeOrMomentsDerivatives
       );
+      if (Parameters::dJdt_coeff > 0) {
+         dPerBOldGrid.copyData(dPerBGrid);
+      }
       #endif
    } else {
       Real subcycleDt = dt/convert<Real>(subcycles);
@@ -283,6 +296,7 @@ bool propagateFields(
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
+            dPerBOldGrid,
             dMomentsGrid,
             dMomentsDt2Grid,
             BgBGrid,
@@ -291,6 +305,9 @@ bool propagateFields(
             RK_ORDER2_STEP1,
             subcycleCount==0 // communicateEGradPeOrMomentsDerivatives
          );
+         if (Parameters::dJdt_coeff > 0) {
+            dPerBOldGrid.copyData(dPerBGrid);
+         }
          
          propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, subcycleDt, RK_ORDER2_STEP2);
          
@@ -328,6 +345,7 @@ bool propagateFields(
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
+            dPerBOldGrid,
             dMomentsGrid,
             dMomentsDt2Grid,
             BgBGrid,
@@ -336,6 +354,9 @@ bool propagateFields(
             RK_ORDER2_STEP2,
             subcycleCount==0 // communicateEGradPeOrMomentsDerivatives
          );
+         if (Parameters::dJdt_coeff > 0) {
+            dPerBOldGrid.copyData(dPerBGrid);
+         }
          
          phiprof::Timer subcyclingTimer {"FS subcycle stuff"};
          subcycleT += subcycleDt; 
@@ -403,6 +424,7 @@ bool propagateFields(
          logFile << "Effective field solver subcycles were " << subcycleCount << " instead of " << P::fieldSolverSubcycles << " on step " <<  P::tstep << std::endl;
       }
    }
+   dPerBOldGrid.finalize();
    
    calculateVolumeAveragedFields(perBGrid,EGrid,dPerBGrid,volGrid,technicalGrid);
    calculateBVOLDerivativesSimple(volGrid, technicalGrid, sysBoundaries);
