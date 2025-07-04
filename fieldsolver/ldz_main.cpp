@@ -107,9 +107,7 @@ bool propagateFields(
       }
    }
 
-   const FsGridTools::FsIndex_t* mntDims = &dPerBGrid.getLocalSize()[0];  
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldGrid = dPerBGrid;
-   
    
    if (subcycles == 1) {
       #ifdef FS_1ST_ORDER_TIME
