@@ -952,7 +952,7 @@ void calculateEdgeElectricFieldY(
    }
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_SW += Parameters::dJdt_coeff /
+      Ey_SW += Parameters::dJdt_coeff /
       moments_SW->at(fsgrids::moments::RHOQ) /
       physicalconstants::MU_0 *
       (
@@ -1325,7 +1325,7 @@ void calculateEdgeElectricFieldZ(
    }
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_SW += Parameters::dJdt_coeff /
+      Ez_SW += Parameters::dJdt_coeff /
       moments_SW->at(fsgrids::moments::RHOQ) /
       physicalconstants::MU_0 *
       (
