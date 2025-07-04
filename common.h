@@ -321,6 +321,13 @@ namespace fsgrids {
       N_EGRADPE
    };
 
+   enum edjdt {
+      EXDJDTE,         /*!< Time derivative of current term x.*/
+      EYDJDTE,         /*!< Time derivative of current term y.*/
+      EZDJDTE,         /*!< Time derivative of current term z.*/
+      N_EDJDT
+   }
+
    enum moments {
       RHOM, /*!< Overall mass density. Calculated by Vlasov propagator, used to propagate fields.*/
       RHOQ, /*!< Overall charge density. Calculated by Vlasov propagator, used to propagate fields.*/

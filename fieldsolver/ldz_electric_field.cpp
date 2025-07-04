@@ -456,9 +456,9 @@ void calculateEdgeElectricFieldX(
    FsGrid< std::array<Real, fsgrids::efield::N_EFIELD>, FS_STENCIL_WIDTH> & EGrid,
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
-   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,
    FsGrid< std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH> & BgBGrid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
@@ -509,10 +509,6 @@ void calculateEdgeElectricFieldX(
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_SE = dPerBGrid.get(i  ,j-1,k  );
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NE = dPerBGrid.get(i  ,j-1,k-1);
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NW = dPerBGrid.get(i  ,j  ,k-1);
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SW = dPerBOldGrid.get(i  ,j  ,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SE = dPerBOldGrid.get(i  ,j-1,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NE = dPerBOldGrid.get(i  ,j-1,k-1);
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NW = dPerBOldGrid.get(i  ,j  ,k-1);
    
    std::array<Real, fsgrids::efield::N_EFIELD> * efield_SW = EGrid.get(i,j,k);
    
@@ -581,15 +577,7 @@ void calculateEdgeElectricFieldX(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_SW += Parameters::dJdt_coeff /
-      moments_SW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
-         (dperb_old_SW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_SW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
-      );
+      Ex_SW += EDJdtGrid.get(i,j,k)->at(fsgrids::edjdt::EXDJDTE);
    }
    
    // Hall term
@@ -649,15 +637,7 @@ void calculateEdgeElectricFieldX(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_SE += Parameters::dJdt_coeff /
-      moments_SE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
-         (dperb_old_SE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_SE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
-      );
+      Ex_SE += EDJdtGrid.get(i,j-1,k)->at(fsgrids::edjdt::EXDJDTE);
    }
 
    // Hall term
@@ -718,15 +698,7 @@ void calculateEdgeElectricFieldX(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_NW += Parameters::dJdt_coeff /
-      moments_NW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
-         (dperb_old_NW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_NW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
-      );
+      Ex_NW += EDJdtGrid.get(i,j,k-1)->at(fsgrids::edjdt::EXDJDTE);
    }
    
    // Hall term
@@ -787,15 +759,7 @@ void calculateEdgeElectricFieldX(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ex_NE += Parameters::dJdt_coeff /
-      moments_NE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
-         (dperb_old_NE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_NE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
-      );
+      Ex_NE += EDJdtGrid.get(i,j-1,k-1)->at(fsgrids::edjdt::EXDJDTE);
    }
 
    // Hall term
@@ -871,9 +835,9 @@ void calculateEdgeElectricFieldY(
    FsGrid< std::array<Real, fsgrids::efield::N_EFIELD>, FS_STENCIL_WIDTH> & EGrid,
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
-   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,
    FsGrid< std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH> & BgBGrid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
@@ -923,10 +887,6 @@ void calculateEdgeElectricFieldY(
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_SE = dPerBGrid.get(i  ,j  ,k-1);
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NW = dPerBGrid.get(i-1,j  ,k  );
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NE = dPerBGrid.get(i-1,j  ,k-1);
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SW = dPerBOldGrid.get(i  ,j  ,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SE = dPerBOldGrid.get(i  ,j  ,k-1);
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NW = dPerBOldGrid.get(i-1,j  ,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NE = dPerBOldGrid.get(i-1,j  ,k-1);
    
    std::array<Real, fsgrids::efield::N_EFIELD> * efield_SW = EGrid.get(i,j,k);
    
@@ -995,15 +955,7 @@ void calculateEdgeElectricFieldY(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ey_SW += Parameters::dJdt_coeff /
-      moments_SW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
-         (dperb_old_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
-      );
+      Ey_SW += EDJdtGrid.get(i,j,k)->at(fsgrids::edjdt::EYDJDTE);
    }
 
    // Hall term
@@ -1064,15 +1016,7 @@ void calculateEdgeElectricFieldY(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ey_SE += Parameters::dJdt_coeff /
-      moments_SE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
-         (dperb_old_SE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_SE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
-      );
+      Ey_SE += EDJdtGrid.get(i,j,k-1)->at(fsgrids::edjdt::EYDJDTE);
    }
 
    // Hall term
@@ -1133,15 +1077,7 @@ void calculateEdgeElectricFieldY(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ey_NW += Parameters::dJdt_coeff /
-      moments_NW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
-         (dperb_old_NW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_NW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
-      );
+      Ey_NW += EDJdtGrid.get(i-1,j,k)->at(fsgrids::edjdt::EYDJDTE);
    }
 
    // Hall term
@@ -1202,15 +1138,7 @@ void calculateEdgeElectricFieldY(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ey_NE += Parameters::dJdt_coeff /
-      moments_NE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
-         (dperb_old_NE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_NE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
-      );
+      Ey_NE += EDJdtGrid.get(i-1,j,k-1)->at(fsgrids::edjdt::EYDJDTE);
    }
 
    // Hall term
@@ -1285,9 +1213,9 @@ void calculateEdgeElectricFieldZ(
    FsGrid< std::array<Real, fsgrids::efield::N_EFIELD>, FS_STENCIL_WIDTH> & EGrid,
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
-   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,
    FsGrid< std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH> & BgBGrid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
@@ -1338,10 +1266,6 @@ void calculateEdgeElectricFieldZ(
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_SE = dPerBGrid.get(i-1,j  ,k  );
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NE = dPerBGrid.get(i-1,j-1,k  );
    std::array<Real, fsgrids::dperb::N_DPERB> * dperb_NW = dPerBGrid.get(i  ,j-1,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SW = dPerBOldGrid.get(i  ,j  ,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_SE = dPerBOldGrid.get(i-1,j  ,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NE = dPerBOldGrid.get(i-1,j-1,k  );
-   std::array<Real, fsgrids::dperb::N_DPERB> * dperb_old_NW = dPerBOldGrid.get(i  ,j-1,k  );
    
    std::array<Real, fsgrids::efield::N_EFIELD> * efield_SW = EGrid.get(i,j,k);
    
@@ -1411,15 +1335,7 @@ void calculateEdgeElectricFieldZ(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ez_SW += Parameters::dJdt_coeff /
-      moments_SW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
-         (dperb_old_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
-      );
+      Ez_SW += EDJdtGrid.get(i,j,k)->at(fsgrids::edjdt::EZDJDTE);
    }
 
    // Hall term
@@ -1482,15 +1398,7 @@ void calculateEdgeElectricFieldZ(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ez_SE += Parameters::dJdt_coeff /
-      moments_SE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_SE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
-         (dperb_old_SE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_SE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
-      );
+      Ez_SE += EDJdtGrid.get(i-1,j,k)->at(fsgrids::edjdt::EZDJDTE);
    }
    
    // Hall term
@@ -1551,15 +1459,7 @@ void calculateEdgeElectricFieldZ(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ez_NW += Parameters::dJdt_coeff /
-      moments_NW->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
-         (dperb_old_NW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_NW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
-      );
+      Ez_NW += EDJdtGrid.get(i,j-1,k)->at(fsgrids::edjdt::EZDJDTE);
    }
    
    // Hall term
@@ -1620,15 +1520,7 @@ void calculateEdgeElectricFieldZ(
 
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
-      Ez_NE += Parameters::dJdt_coeff /
-      moments_NE->at(fsgrids::moments::RHOQ) /
-      physicalconstants::MU_0 *
-      physicalconstants::MASS_ELECTRON /
-      physicalconstants::CHARGE *
-      (
-         (dperb_NE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
-         (dperb_old_NE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_NE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
-      );
+      Ez_NE += EDJdtGrid.get(i-1,j-1,k)->at(fsgrids::edjdt::EZDJDTE);
    }
    
    // Hall term
@@ -1714,9 +1606,9 @@ void calculateElectricField(
    FsGrid< std::array<Real, fsgrids::efield::N_EFIELD>, FS_STENCIL_WIDTH> & EGrid,
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
-   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,
    FsGrid< std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH> & BgBGrid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
@@ -1740,7 +1632,6 @@ void calculateElectricField(
          EGradPeGrid,
          momentsGrid,
          dPerBGrid,
-         dPerBOldGrid,
          dMomentsGrid,
          BgBGrid,
          technicalGrid,
@@ -1759,9 +1650,9 @@ void calculateElectricField(
          EGrid,
          EHallGrid,
          EGradPeGrid,
+         EDJdtGrid,
          momentsGrid,
          dPerBGrid,
-         dPerBOldGrid,
          dMomentsGrid,
          BgBGrid,
          technicalGrid,
@@ -1780,9 +1671,9 @@ void calculateElectricField(
          EGrid,
          EHallGrid,
          EGradPeGrid,
+         EDJdtGrid,
          momentsGrid,
          dPerBGrid,
-         dPerBOldGrid,
          dMomentsGrid,
          BgBGrid,
          technicalGrid,
@@ -1826,6 +1717,7 @@ void calculateUpwindedElectricFieldSimple(
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeDt2Grid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
@@ -1849,6 +1741,9 @@ void calculateUpwindedElectricFieldSimple(
    if(P::ohmHallTerm > 0) {
       EHallGrid.updateGhostCells();
    }
+   if(P::dJdt_coeff > 0) {
+      EDJdtGrid.updateGhostCells();
+   }
    if(P::ohmGradPeTerm > 0 && communicateEGradPeOrMomentsDerivatives) {
       if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
          EGradPeGrid.updateGhostCells();
@@ -1856,7 +1751,7 @@ void calculateUpwindedElectricFieldSimple(
          EGradPeDt2Grid.updateGhostCells();
       }
    }
-   if(P::ohmHallTerm == 0) {
+   if(P::ohmHallTerm == 0 && P::dJdt_coeff == 0) {
       dPerBGrid.updateGhostCells();
    }
    if(P::ohmHallTerm == 0 && P::ohmGradPeTerm == 0 && communicateEGradPeOrMomentsDerivatives) {
@@ -1883,9 +1778,9 @@ void calculateUpwindedElectricFieldSimple(
                      EGrid,
                      EHallGrid,
                      EGradPeGrid,
+                     EDJdtGrid,
                      momentsGrid,
                      dPerBGrid,
-                     dPerBOldGrid,
                      dMomentsGrid,
                      BgBGrid,
                      technicalGrid,
@@ -1901,9 +1796,9 @@ void calculateUpwindedElectricFieldSimple(
                      EDt2Grid,
                      EHallGrid,
                      EGradPeDt2Grid,
+                     EDJdtGrid,
                      momentsDt2Grid,
                      dPerBGrid,
-                     dPerBOldGrid,
                      dMomentsDt2Grid,
                      BgBGrid,
                      technicalGrid,

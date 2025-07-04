@@ -47,6 +47,7 @@
 #include "ldz_magnetic_field.hpp"
 #include "ldz_hall.hpp"
 #include "ldz_gradpe.hpp"
+#include "ldz_djdt.hpp"
 #include "ldz_volume.hpp"
 #include "fs_common.h"
 #include "derivatives.hpp"
@@ -78,6 +79,7 @@ bool propagateFields(
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeDt2Grid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
@@ -133,6 +135,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER1);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -141,10 +146,10 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
-         dPerBOldGrid,
          dMomentsGrid,
          dMomentsDt2Grid,
          BgBGrid,
@@ -153,9 +158,6 @@ bool propagateFields(
          RK_ORDER1,
          true // communicateEGradPeOrMomentsDerivatives
       );
-      if (Parameters::dJdt_coeff > 0) {
-         dPerBOldGrid.copyData(dPerBGrid);
-      }
       #else
       propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, dt, RK_ORDER2_STEP1);
       calculateDerivativesSimple(perBGrid, perBDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dMomentsGrid, dMomentsDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1, true/*doMoments*/);
@@ -179,6 +181,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -187,10 +192,10 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
-         dPerBOldGrid,
          dMomentsGrid,
          dMomentsDt2Grid,
          BgBGrid,
@@ -199,9 +204,6 @@ bool propagateFields(
          RK_ORDER2_STEP1,
          true // communicateEGradPeOrMomentsDerivatives
       );
-      if (Parameters::dJdt_coeff > 0) {
-         dPerBOldGrid.copyData(dPerBGrid);
-      }
       propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, dt, RK_ORDER2_STEP2);
       calculateDerivativesSimple(perBGrid, perBDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dMomentsGrid, dMomentsDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2, true/*doMoments*/);
       if(P::ohmGradPeTerm > 0) {
@@ -224,6 +226,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -232,6 +237,7 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
@@ -244,9 +250,6 @@ bool propagateFields(
          RK_ORDER2_STEP2,
          true // communicateEGradPeOrMomentsDerivatives
       );
-      if (Parameters::dJdt_coeff > 0) {
-         dPerBOldGrid.copyData(dPerBGrid);
-      }
       #endif
    } else {
       Real subcycleDt = dt/convert<Real>(subcycles);
@@ -284,6 +287,9 @@ bool propagateFields(
                subcycleCount==0 // communicateMomentsDerivatives
             );
          }
+         if(P::dJdt_coeff > 0) {
+            calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+         }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
             perBDt2Grid,
@@ -292,6 +298,7 @@ bool propagateFields(
             EHallGrid,
             EGradPeGrid,
             EGradPeDt2Grid,
+            EDJdtGrid,
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
@@ -304,9 +311,6 @@ bool propagateFields(
             RK_ORDER2_STEP1,
             subcycleCount==0 // communicateEGradPeOrMomentsDerivatives
          );
-         if (Parameters::dJdt_coeff > 0) {
-            dPerBOldGrid.copyData(dPerBGrid);
-         }
          
          propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, subcycleDt, RK_ORDER2_STEP2);
          
@@ -333,6 +337,9 @@ bool propagateFields(
                subcycleCount==0 // communicateMomentsDerivatives
             );
          }
+         if(P::dJdt_coeff > 0) {
+            calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+         }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
             perBDt2Grid,
@@ -341,6 +348,7 @@ bool propagateFields(
             EHallGrid,
             EGradPeGrid,
             EGradPeDt2Grid,
+            EDJdtGrid,
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
@@ -353,9 +361,6 @@ bool propagateFields(
             RK_ORDER2_STEP2,
             subcycleCount==0 // communicateEGradPeOrMomentsDerivatives
          );
-         if (Parameters::dJdt_coeff > 0) {
-            dPerBOldGrid.copyData(dPerBGrid);
-         }
          
          phiprof::Timer subcyclingTimer {"FS subcycle stuff"};
          subcycleT += subcycleDt; 
