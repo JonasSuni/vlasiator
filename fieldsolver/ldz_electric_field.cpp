@@ -578,6 +578,7 @@ void calculateEdgeElectricFieldX(
        physicalconstants::MU_0 *
        (dperb_SW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ);
    }
+
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
       Ex_SW += Parameters::dJdt_coeff /
@@ -646,6 +647,19 @@ void calculateEdgeElectricFieldX(
        (dperb_SE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ);
    }
 
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ex_SE += Parameters::dJdt_coeff /
+      moments_SE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_SE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
+         (dperb_old_SE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_SE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
+      );
+   }
+
    // Hall term
    if(Parameters::ohmHallTerm > 0) {
       Ex_SE += EHallGrid.get(i,j-1,k)->at(fsgrids::ehall::EXHALL_010_110);
@@ -700,6 +714,19 @@ void calculateEdgeElectricFieldX(
        moments_NW->at(fsgrids::moments::RHOQ) /
        physicalconstants::MU_0 *
        (dperb_NW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ);
+   }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ex_NW += Parameters::dJdt_coeff /
+      moments_NW->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
+         (dperb_old_NW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_NW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
+      );
    }
    
    // Hall term
@@ -756,6 +783,19 @@ void calculateEdgeElectricFieldX(
                moments_NE->at(fsgrids::moments::RHOQ) /
                physicalconstants::MU_0 *
                (dperb_NE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ);
+   }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ex_NE += Parameters::dJdt_coeff /
+      moments_NE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_NE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
+         (dperb_old_NE->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_NE->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
+      );
    }
 
    // Hall term
@@ -952,6 +992,7 @@ void calculateEdgeElectricFieldY(
         physicalconstants::MU_0 *
         (dperb_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX);
    }
+
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
       Ey_SW += Parameters::dJdt_coeff /
@@ -964,6 +1005,7 @@ void calculateEdgeElectricFieldY(
          (dperb_old_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
       );
    }
+
    // Hall term
    if (Parameters::ohmHallTerm > 0) {
       Ey_SW += EHallGrid.get(i,j,k)->at(fsgrids::ehall::EYHALL_000_010);
@@ -1018,6 +1060,19 @@ void calculateEdgeElectricFieldY(
         moments_SE->at(fsgrids::moments::RHOQ) /
         physicalconstants::MU_0 *
         (dperb_SE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX);
+   }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ey_SE += Parameters::dJdt_coeff /
+      moments_SE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_SE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
+         (dperb_old_SE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_SE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
+      );
    }
 
    // Hall term
@@ -1076,6 +1131,19 @@ void calculateEdgeElectricFieldY(
         (dperb_NW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX);
    }
 
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ey_NW += Parameters::dJdt_coeff /
+      moments_NW->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
+         (dperb_old_NW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_NW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
+      );
+   }
+
    // Hall term
    if(Parameters::ohmHallTerm > 0) {
       Ey_NW += EHallGrid.get(i-1,j,k)->at(fsgrids::ehall::EYHALL_100_110);
@@ -1130,6 +1198,19 @@ void calculateEdgeElectricFieldY(
         moments_NE->at(fsgrids::moments::RHOQ) /
         physicalconstants::MU_0 *
         (dperb_NE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX);
+   }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ey_NE += Parameters::dJdt_coeff /
+      moments_NE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_NE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
+         (dperb_old_NE->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_NE->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
+      );
    }
 
    // Hall term
@@ -1327,6 +1408,7 @@ void calculateEdgeElectricFieldZ(
        physicalconstants::MU_0 *
        (dperb_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY);
    }
+
    // Time derivative of current term
    if (Parameters::dJdt_coeff > 0) {
       Ez_SW += Parameters::dJdt_coeff /
@@ -1339,6 +1421,7 @@ void calculateEdgeElectricFieldZ(
          (dperb_old_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
       );
    }
+
    // Hall term
    if (Parameters::ohmHallTerm > 0) {
       Ez_SW += EHallGrid.get(i,j,k)->at(fsgrids::ehall::EZHALL_000_001);
@@ -1396,6 +1479,19 @@ void calculateEdgeElectricFieldZ(
         physicalconstants::MU_0 *
         (dperb_SE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY);
    }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ez_SE += Parameters::dJdt_coeff /
+      moments_SE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_SE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
+         (dperb_old_SE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_SE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
+      );
+   }
    
    // Hall term
    if (Parameters::ohmHallTerm > 0) {
@@ -1452,6 +1548,19 @@ void calculateEdgeElectricFieldZ(
         physicalconstants::MU_0 *
         (dperb_NW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY);
    }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ez_NW += Parameters::dJdt_coeff /
+      moments_NW->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
+         (dperb_old_NW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_NW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
+      );
+   }
    
    // Hall term
    if(Parameters::ohmHallTerm > 0) {
@@ -1507,6 +1616,19 @@ void calculateEdgeElectricFieldZ(
         moments_NE->at(fsgrids::moments::RHOQ) /
         physicalconstants::MU_0 *
         (dperb_NE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY);
+   }
+
+   // Time derivative of current term
+   if (Parameters::dJdt_coeff > 0) {
+      Ez_NE += Parameters::dJdt_coeff /
+      moments_NE->at(fsgrids::moments::RHOQ) /
+      physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
+      (
+         (dperb_NE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_NE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
+         (dperb_old_NE->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_NE->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
+      );
    }
    
    // Hall term
