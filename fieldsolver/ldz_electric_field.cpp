@@ -583,6 +583,8 @@ void calculateEdgeElectricFieldX(
       Ex_SW += Parameters::dJdt_coeff /
       moments_SW->at(fsgrids::moments::RHOQ) /
       physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
       (
          (dperb_SW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_SW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ) - 
          (dperb_old_SW->at(fsgrids::dperb::dPERBzdy)/technicalGrid.DY - dperb_old_SW->at(fsgrids::dperb::dPERBydz)/technicalGrid.DZ)
@@ -955,6 +957,8 @@ void calculateEdgeElectricFieldY(
       Ey_SW += Parameters::dJdt_coeff /
       moments_SW->at(fsgrids::moments::RHOQ) /
       physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
       (
          (dperb_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX) - 
          (dperb_old_SW->at(fsgrids::dperb::dPERBxdz)/technicalGrid.DZ - dperb_old_SW->at(fsgrids::dperb::dPERBzdx)/technicalGrid.DX)
@@ -1328,6 +1332,8 @@ void calculateEdgeElectricFieldZ(
       Ez_SW += Parameters::dJdt_coeff /
       moments_SW->at(fsgrids::moments::RHOQ) /
       physicalconstants::MU_0 *
+      physicalconstants::MASS_ELECTRON /
+      physicalconstants::CHARGE *
       (
          (dperb_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY) - 
          (dperb_old_SW->at(fsgrids::dperb::dPERBydx)/technicalGrid.DX - dperb_old_SW->at(fsgrids::dperb::dPERBxdy)/technicalGrid.DY)
