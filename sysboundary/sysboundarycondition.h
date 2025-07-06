@@ -112,6 +112,13 @@ namespace SBC {
             cint k,
             cuint component
          )=0;
+         virtual void fieldSolverBoundaryCondDJdtElectricField(
+            FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
+            cint i,
+            cint j,
+            cint k,
+            cuint component
+         )=0;
          virtual void fieldSolverBoundaryCondDerivatives(
             FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
             FsGrid< std::array<Real, fsgrids::dmoments::N_DMOMENTS>, FS_STENCIL_WIDTH> & dMomentsGrid,

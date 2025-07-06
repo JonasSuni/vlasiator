@@ -206,9 +206,9 @@ void calculateDJdtTerm(
    cuint cellSysBoundaryLayer = technicalGrid.get(i,j,k)->sysBoundaryLayer;
 
    if ((cellSysBoundaryFlag != sysboundarytype::NOT_SYSBOUNDARY) && (cellSysBoundaryLayer != 1)) {
-      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondGradPeElectricField(EDJdtGrid,i,j,k,0);
-      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondGradPeElectricField(EDJdtGrid,i,j,k,1);
-      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondGradPeElectricField(EDJdtGrid,i,j,k,2);
+      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondDJdtElectricField(EDJdtGrid,i,j,k,0);
+      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondDJdtElectricField(EDJdtGrid,i,j,k,1);
+      sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondDJdtElectricField(EDJdtGrid,i,j,k,2);
    } else {
       calculateEdgeDJdtTermXComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k);
       calculateEdgeDJdtTermYComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k);
