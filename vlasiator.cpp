@@ -496,7 +496,6 @@ int simulate(int argn,char* args[]) {
       dMomentsGrid,
       EGrid,
       EGradPeGrid,
-      EDJdtGrid,
       volGrid,
       technicalGrid,
       sysBoundaryContainer,
