@@ -116,8 +116,8 @@ void calculateEdgeDJdtTermXComponents(
       physicalconstants::MASS_ELECTRON /
       physicalconstants::CHARGE *
       (
-         (dPerBGrid->at(fsgrids::dperb::dPERBzdy)/dPerBGrid.DY - dPerBGrid->at(fsgrids::dperb::dPERBydz)/dPerBGrid.DZ) - 
-         (dPerBOldGrid->at(fsgrids::dperb::dPERBzdy)/dPerBGrid.DY - dPerBOldGrid->at(fsgrids::dperb::dPERBydz)/dPerBGrid.DZ)
+         (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdy)/dPerBGrid.DY - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydz)/dPerBGrid.DZ) - 
+         (dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdy)/dPerBGrid.DY - dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydz)/dPerBGrid.DZ)
       );
    }
 }
@@ -144,8 +144,8 @@ void calculateEdgeDJdtTermYComponents(
       physicalconstants::MASS_ELECTRON /
       physicalconstants::CHARGE *
       (
-         (dPerBGrid->at(fsgrids::dperb::dPERBxdz)/dPerBGrid.DZ - dPerBGrid->at(fsgrids::dperb::dPERBzdx)/dPerBGrid.DX) - 
-         (dPerBOldGrid->at(fsgrids::dperb::dPERBxdz)/dPerBGrid.DZ - dPerBOldGrid->at(fsgrids::dperb::dPERBzdx)/dPerBGrid.DX)
+         (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdz)/dPerBGrid.DZ - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdx)/dPerBGrid.DX) - 
+         (dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdz)/dPerBGrid.DZ - dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdx)/dPerBGrid.DX)
       );
    }
 }
@@ -172,8 +172,8 @@ void calculateEdgeDJdtTermZComponents(
       physicalconstants::MASS_ELECTRON /
       physicalconstants::CHARGE *
       (
-         (dPerBGrid->at(fsgrids::dperb::dPERBydx)/dPerBGrid.DX - dPerBGrid->at(fsgrids::dperb::dPERBxdy)/dPerBGrid.DY) - 
-         (dPerBOldGrid->at(fsgrids::dperb::dPERBydx)/dPerBGrid.DX - dPerBOldGrid->at(fsgrids::dperb::dPERBxdy)/dPerBGrid.DY)
+         (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydx)/dPerBGrid.DX - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdy)/dPerBGrid.DY) - 
+         (dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydx)/dPerBGrid.DX - dPerBOldGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdy)/dPerBGrid.DY)
       );
    }
 }
