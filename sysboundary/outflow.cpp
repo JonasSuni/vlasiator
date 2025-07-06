@@ -363,6 +363,16 @@ namespace SBC {
    ) {
       EGradPeGrid.get(i,j,k)->at(fsgrids::egradpe::EXGRADPE+component) = 0.0;
    }
+   
+   void Outflow::fieldSolverBoundaryCondDJdtElectricField(
+      FsGrid< array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
+      cint i,
+      cint j,
+      cint k,
+      cuint component
+   ) {
+      EDJdtGrid.get(i,j,k)->at(fsgrids::edjdt::EXDJDTE+component) = 0.0;
+   }
 
    void Outflow::fieldSolverBoundaryCondDerivatives(
       FsGrid< array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
