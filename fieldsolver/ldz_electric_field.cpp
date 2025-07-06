@@ -1190,7 +1190,7 @@ void calculateEdgeElectricFieldY(
    
    if ((RKCase == RK_ORDER1) || (RKCase == RK_ORDER2_STEP2)) {
       //compute maximum timestep for fieldsolver in this cell (CFL=1)      
-      Real min_dx=std::numeric_limits<Real>::max();;
+      Real min_dx=std::numeric_limits<Real>::max();
       min_dx=min(min_dx,technicalGrid.DX);
       min_dx=min(min_dx,technicalGrid.DZ);
       //update max allowed timestep for field propagation in this cell, which is the minimum of CFL=1 timesteps
