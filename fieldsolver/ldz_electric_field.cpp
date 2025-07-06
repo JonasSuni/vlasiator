@@ -1630,6 +1630,7 @@ void calculateElectricField(
          EGrid,
          EHallGrid,
          EGradPeGrid,
+         EDJdtGrid,
          momentsGrid,
          dPerBGrid,
          dMomentsGrid,
