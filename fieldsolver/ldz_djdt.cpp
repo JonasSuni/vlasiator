@@ -237,9 +237,9 @@ void calculateDJdtTermSimple(
    phiprof::Timer mpiTimer {"EDJdt field update ghosts MPI", {"MPI"}};
    dPerBGrid.updateGhostCells();
    if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
-      dPerBOldGrid.updateGhostCells();;
+      dPerBOldGrid.updateGhostCells();
    } else {
-      dPerBOldDt2Grid.updateGhostCells();;
+      dPerBOldDt2Grid.updateGhostCells();
    }
    mpiTimer.stop();
 
@@ -253,15 +253,19 @@ void calculateDJdtTermSimple(
             for (FsGridTools::FsIndex_t i=0; i<gridDims[0]; i++) {
                if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
                   calculateDJdtTerm(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, i, j, k, sysBoundaries);
-                  dPerBOldGrid.copyData(dPerBGrid);
                } else {
                   calculateDJdtTerm(EDJdtDt2Grid, momentsDt2Grid, dPerBGrid, dPerBOldDt2Grid, technicalGrid, i, j, k, sysBoundaries);
-                  dPerBOldDt2Grid.copyData(dPerBGrid);
                }
             }
          }
       }
       computeTimer.stop(N_cells,"Spatial Cells");
+   }
+   
+   if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
+      dPerBOldGrid.copyData(dPerBGrid);
+   } else {
+      dPerBOldDt2Grid.copyData(dPerBGrid);
    }
 
    DJdtTimer.stop(N_cells,"Spatial Cells");
