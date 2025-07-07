@@ -45,7 +45,6 @@
 #include "cpu_acc_transform.hpp" // for updateAccelerationMaxdt
 #ifdef USE_GPU
 #include "gpu_moments.h"
-#include "gpu_acc_map.hpp"
 #include "gpu_acc_semilag.hpp"
 #include "gpu_trans_map_amr.hpp"
 #else
@@ -53,7 +52,6 @@
 #include "cpu_trans_map_amr.hpp"
 #endif
 
-using namespace std;
 using namespace spatial_cell;
 
 /** Propagates the distribution function in spatial space.
@@ -85,7 +83,7 @@ void calculateSpatialTranslation(
    MPI_Barrier(MPI_COMM_WORLD);
    btzTimer.stop();
 
-    // ------------- SLICE - map dist function in Z --------------- //
+   // ------------- SLICE - map dist function in Z --------------- //
    if(P::zcells_ini > 1){
 
       phiprof::Timer transTimer {"transfer-stencil-data-z", {"MPI"}};
@@ -437,7 +435,7 @@ void calculateAcceleration(const uint popID,const uint globalMaxSubcycles,const 
          Compute subcycle dt. The length is maxVdt on all steps
          except the (possible) last one. This was to keep neighboring
          spatial cells in sync (with respect to gyration), so that
-         two neighboring cells with different number of subcycles 
+         two neighboring cells with different number of subcycles
          have similar gyration angles, but adjusting the length of the
          last step so all are accelerated for the same amount of time.
          This keeps spatial block neighbors as much in sync as possible
@@ -655,5 +653,8 @@ void calculateInitialVelocityMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_G
       SC->parameters[CellParams::P_11_DT2] = SC->parameters[CellParams::P_11];
       SC->parameters[CellParams::P_22_DT2] = SC->parameters[CellParams::P_22];
       SC->parameters[CellParams::P_33_DT2] = SC->parameters[CellParams::P_33];
+      SC->parameters[CellParams::P_12_DT2] = SC->parameters[CellParams::P_12];
+      SC->parameters[CellParams::P_13_DT2] = SC->parameters[CellParams::P_13];
+      SC->parameters[CellParams::P_23_DT2] = SC->parameters[CellParams::P_23];
    } // for-loop over spatial cells
 }
