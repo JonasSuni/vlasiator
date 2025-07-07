@@ -236,8 +236,6 @@ void calculateDJdtTermSimple(
 
    phiprof::Timer mpiTimer {"EDJdt field update ghosts MPI", {"MPI"}};
    dPerBGrid.updateGhostCells();
-   
-   phiprof::Timer mpiTimer {"EgradPe field update ghosts MPI", {"MPI"}};
    if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
       dPerBOldGrid.updateGhostCells();;
    } else {

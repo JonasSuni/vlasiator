@@ -1282,6 +1282,7 @@ int simulate(int argn,char* args[]) {
             EGradPeGrid,
             EGradPeDt2Grid,
             EDJdtGrid,
+            EDJdtDt2Grid,
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
