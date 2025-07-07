@@ -80,6 +80,7 @@ bool propagateFields(
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeDt2Grid,
    FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtDt2Grid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
@@ -110,6 +111,7 @@ bool propagateFields(
    }
 
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldGrid = dPerBGrid;
+   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldDt2Grid = dPerBGrid;
    
    if (subcycles == 1) {
       #ifdef FS_1ST_ORDER_TIME
@@ -136,7 +138,7 @@ bool propagateFields(
          );
       }
       if(P::dJdt_coeff > 0) {
-         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER1);
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER1);
       }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
@@ -182,7 +184,7 @@ bool propagateFields(
          );
       }
       if(P::dJdt_coeff > 0) {
-         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
       }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
@@ -227,7 +229,7 @@ bool propagateFields(
          );
       }
       if(P::dJdt_coeff > 0) {
-         calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
       }
       calculateUpwindedElectricFieldSimple(
          perBGrid,

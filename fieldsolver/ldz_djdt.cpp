@@ -218,11 +218,12 @@ void calculateDJdtTerm(
 
 void calculateDJdtTermSimple(
    FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
-   // FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtDt2Grid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtDt2Grid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
-   // FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
+   FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
+   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldDt2Grid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
    SysBoundary& sysBoundaries,
    cint& RKCase
@@ -235,7 +236,13 @@ void calculateDJdtTermSimple(
 
    phiprof::Timer mpiTimer {"EDJdt field update ghosts MPI", {"MPI"}};
    dPerBGrid.updateGhostCells();
-   dPerBOldGrid.updateGhostCells();
+   
+   phiprof::Timer mpiTimer {"EgradPe field update ghosts MPI", {"MPI"}};
+   if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
+      dPerBOldGrid.updateGhostCells();;
+   } else {
+      dPerBOldDt2Grid.updateGhostCells();;
+   }
    mpiTimer.stop();
 
    // Calculate GradPe term
@@ -248,16 +255,16 @@ void calculateDJdtTermSimple(
             for (FsGridTools::FsIndex_t i=0; i<gridDims[0]; i++) {
                if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
                   calculateDJdtTerm(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, i, j, k, sysBoundaries);
+                  dPerBOldGrid.copyData(dPerBGrid);
                } else {
-                  calculateDJdtTerm(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, i, j, k, sysBoundaries);
+                  calculateDJdtTerm(EDJdtDt2Grid, momentsDt2Grid, dPerBGrid, dPerBOldDt2Grid, technicalGrid, i, j, k, sysBoundaries);
+                  dPerBOldDt2Grid.copyData(dPerBGrid);
                }
             }
          }
       }
       computeTimer.stop(N_cells,"Spatial Cells");
    }
-
-   dPerBOldGrid.copyData(dPerBGrid);
 
    DJdtTimer.stop(N_cells,"Spatial Cells");
 }

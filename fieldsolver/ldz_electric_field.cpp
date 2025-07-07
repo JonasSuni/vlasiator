@@ -1719,6 +1719,7 @@ void calculateUpwindedElectricFieldSimple(
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeDt2Grid,
    FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtDt2Grid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
@@ -1742,7 +1743,11 @@ void calculateUpwindedElectricFieldSimple(
       EHallGrid.updateGhostCells();
    }
    if(P::dJdt_coeff > 0) {
-      EDJdtGrid.updateGhostCells();
+      if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
+         EDJdtGrid.updateGhostCells();
+      } else {
+         EDJdtDt2Grid.updateGhostCells();
+      }
    }
    if(P::ohmGradPeTerm > 0 && communicateEGradPeOrMomentsDerivatives) {
       if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
@@ -1796,7 +1801,7 @@ void calculateUpwindedElectricFieldSimple(
                      EDt2Grid,
                      EHallGrid,
                      EGradPeDt2Grid,
-                     EDJdtGrid,
+                     EDJdtDt2Grid,
                      momentsDt2Grid,
                      dPerBGrid,
                      dMomentsDt2Grid,
