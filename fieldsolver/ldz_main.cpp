@@ -292,7 +292,7 @@ bool propagateFields(
             );
          }
          if(P::dJdt_coeff > 0) {
-            calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+            calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
          }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
@@ -342,7 +342,7 @@ bool propagateFields(
             );
          }
          if(P::dJdt_coeff > 0) {
-            calculateDJdtTermSimple(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+            calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
          }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
