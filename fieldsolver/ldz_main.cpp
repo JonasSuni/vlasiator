@@ -47,6 +47,7 @@
 #include "ldz_magnetic_field.hpp"
 #include "ldz_hall.hpp"
 #include "ldz_gradpe.hpp"
+#include "ldz_djdt.hpp"
 #include "ldz_volume.hpp"
 #include "fs_common.h"
 #include "derivatives.hpp"
@@ -78,6 +79,8 @@ bool propagateFields(
    FsGrid< std::array<Real, fsgrids::ehall::N_EHALL>, FS_STENCIL_WIDTH> & EHallGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeGrid,
    FsGrid< std::array<Real, fsgrids::egradpe::N_EGRADPE>, FS_STENCIL_WIDTH> & EGradPeDt2Grid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtGrid,
+   FsGrid< std::array<Real, fsgrids::edjdt::N_EDJDT>, FS_STENCIL_WIDTH> & EDJdtDt2Grid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
    FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsDt2Grid,
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBGrid,
@@ -106,7 +109,9 @@ bool propagateFields(
          }
       }
    }
-   
+
+   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldGrid = dPerBGrid;
+   FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> dPerBOldDt2Grid = dPerBGrid;
    
    if (subcycles == 1) {
       #ifdef FS_1ST_ORDER_TIME
@@ -132,6 +137,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER1);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -140,6 +148,8 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
+         EDJdtDt2Grid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
@@ -174,6 +184,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -182,6 +195,8 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
+         EDJdtDt2Grid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
@@ -193,7 +208,6 @@ bool propagateFields(
          RK_ORDER2_STEP1,
          true // communicateEGradPeOrMomentsDerivatives
       );
-      
       propagateMagneticFieldSimple(perBGrid, perBDt2Grid, BgBGrid, EGrid, EDt2Grid, technicalGrid, sysBoundaries, dt, RK_ORDER2_STEP2);
       calculateDerivativesSimple(perBGrid, perBDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dMomentsGrid, dMomentsDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2, true/*doMoments*/);
       if(P::ohmGradPeTerm > 0) {
@@ -216,6 +230,9 @@ bool propagateFields(
             true // communicateMomentsDerivatives
          );
       }
+      if(P::dJdt_coeff > 0) {
+         calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+      }
       calculateUpwindedElectricFieldSimple(
          perBGrid,
          perBDt2Grid,
@@ -224,6 +241,8 @@ bool propagateFields(
          EHallGrid,
          EGradPeGrid,
          EGradPeDt2Grid,
+         EDJdtGrid,
+         EDJdtDt2Grid,
          momentsGrid,
          momentsDt2Grid,
          dPerBGrid,
@@ -272,6 +291,9 @@ bool propagateFields(
                subcycleCount==0 // communicateMomentsDerivatives
             );
          }
+         if(P::dJdt_coeff > 0) {
+            calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP1);
+         }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
             perBDt2Grid,
@@ -280,6 +302,8 @@ bool propagateFields(
             EHallGrid,
             EGradPeGrid,
             EGradPeDt2Grid,
+            EDJdtGrid,
+            EDJdtDt2Grid,
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
@@ -317,6 +341,9 @@ bool propagateFields(
                subcycleCount==0 // communicateMomentsDerivatives
             );
          }
+         if(P::dJdt_coeff > 0) {
+            calculateDJdtTermSimple(EDJdtGrid, EDJdtDt2Grid, momentsGrid, momentsDt2Grid, dPerBGrid, dPerBOldGrid, dPerBOldDt2Grid, technicalGrid, sysBoundaries, RK_ORDER2_STEP2);
+         }
          calculateUpwindedElectricFieldSimple(
             perBGrid,
             perBDt2Grid,
@@ -325,6 +352,8 @@ bool propagateFields(
             EHallGrid,
             EGradPeGrid,
             EGradPeDt2Grid,
+            EDJdtGrid,
+            EDJdtDt2Grid,
             momentsGrid,
             momentsDt2Grid,
             dPerBGrid,
@@ -403,6 +432,8 @@ bool propagateFields(
          logFile << "Effective field solver subcycles were " << subcycleCount << " instead of " << P::fieldSolverSubcycles << " on step " <<  P::tstep << std::endl;
       }
    }
+   dPerBOldGrid.finalize();
+   dPerBOldDt2Grid.finalize();
    
    calculateVolumeAveragedFields(perBGrid,EGrid,dPerBGrid,volGrid,technicalGrid);
    calculateBVOLDerivativesSimple(volGrid, technicalGrid, sysBoundaries);
