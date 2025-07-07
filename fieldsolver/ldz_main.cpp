@@ -433,6 +433,7 @@ bool propagateFields(
       }
    }
    dPerBOldGrid.finalize();
+   dPerBOldDt2Grid.finalize();
    
    calculateVolumeAveragedFields(perBGrid,EGrid,dPerBGrid,volGrid,technicalGrid);
    calculateBVOLDerivativesSimple(volGrid, technicalGrid, sysBoundaries);
