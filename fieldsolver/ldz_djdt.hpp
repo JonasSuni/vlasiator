@@ -32,6 +32,7 @@ void calculateDJdtTermSimple(
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldDt2Grid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
    SysBoundary& sysBoundaries,
+   creal& dt,
    cint& RKCase
 );
 
