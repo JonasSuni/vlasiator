@@ -101,7 +101,8 @@ void calculateEdgeDJdtTermXComponents(
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    cint i,
    cint j,
-   cint k
+   cint k,
+   creal& dt
 ) {
    Real limitedRhoq = 0.0;
    Real rhoq = 0.0;
@@ -114,6 +115,7 @@ void calculateEdgeDJdtTermXComponents(
       limitedRhoq /
       physicalconstants::MU_0 *
       physicalconstants::MASS_ELECTRON /
+      dt /
       physicalconstants::CHARGE *
       (
          (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdy)/dPerBGrid.DY - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydz)/dPerBGrid.DZ) - 
@@ -129,7 +131,8 @@ void calculateEdgeDJdtTermYComponents(
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    cint i,
    cint j,
-   cint k
+   cint k,
+   creal& dt
 ) {
    Real limitedRhoq = 0.0;
    Real rhoq = 0.0;
@@ -142,6 +145,7 @@ void calculateEdgeDJdtTermYComponents(
       limitedRhoq /
       physicalconstants::MU_0 *
       physicalconstants::MASS_ELECTRON /
+      dt /
       physicalconstants::CHARGE *
       (
          (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdz)/dPerBGrid.DZ - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBzdx)/dPerBGrid.DX) - 
@@ -157,7 +161,8 @@ void calculateEdgeDJdtTermZComponents(
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldGrid,
    cint i,
    cint j,
-   cint k
+   cint k,
+   creal& dt
 ) {
    Real limitedRhoq = 0.0;
    Real rhoq = 0.0;
@@ -170,6 +175,7 @@ void calculateEdgeDJdtTermZComponents(
       limitedRhoq /
       physicalconstants::MU_0 *
       physicalconstants::MASS_ELECTRON /
+      dt /
       physicalconstants::CHARGE *
       (
          (dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBydx)/dPerBGrid.DX - dPerBGrid.get(i,j,k)->at(fsgrids::dperb::dPERBxdy)/dPerBGrid.DY) - 
@@ -190,7 +196,8 @@ void calculateDJdtTerm(
    cint i,
    cint j,
    cint k,
-   SysBoundary& sysBoundaries
+   SysBoundary& sysBoundaries,
+   creal& dt
 ) {
    #ifdef DEBUG_FSOLVER
    if (technicalGrid.get(i,j,k) == NULL) {
@@ -210,9 +217,9 @@ void calculateDJdtTerm(
       sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondDJdtElectricField(EDJdtGrid,i,j,k,1);
       sysBoundaries.getSysBoundary(cellSysBoundaryFlag)->fieldSolverBoundaryCondDJdtElectricField(EDJdtGrid,i,j,k,2);
    } else {
-      calculateEdgeDJdtTermXComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k);
-      calculateEdgeDJdtTermYComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k);
-      calculateEdgeDJdtTermZComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k);
+      calculateEdgeDJdtTermXComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k,dt);
+      calculateEdgeDJdtTermYComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k,dt);
+      calculateEdgeDJdtTermZComponents(EDJdtGrid,momentsGrid,dPerBGrid,dPerBOldGrid,i,j,k,dt);
    }
 }
 
@@ -226,6 +233,7 @@ void calculateDJdtTermSimple(
    FsGrid< std::array<Real, fsgrids::dperb::N_DPERB>, FS_STENCIL_WIDTH> & dPerBOldDt2Grid,
    FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
    SysBoundary& sysBoundaries,
+   creal& dt,
    cint& RKCase
 ) {
    //const std::array<int, 3> gridDims = technicalGrid.getLocalSize();
@@ -252,9 +260,9 @@ void calculateDJdtTermSimple(
          for (FsGridTools::FsIndex_t j=0; j<gridDims[1]; j++) {
             for (FsGridTools::FsIndex_t i=0; i<gridDims[0]; i++) {
                if (RKCase == RK_ORDER1 || RKCase == RK_ORDER2_STEP2) {
-                  calculateDJdtTerm(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, i, j, k, sysBoundaries);
+                  calculateDJdtTerm(EDJdtGrid, momentsGrid, dPerBGrid, dPerBOldGrid, technicalGrid, i, j, k, sysBoundaries, dt);
                } else {
-                  calculateDJdtTerm(EDJdtDt2Grid, momentsDt2Grid, dPerBGrid, dPerBOldDt2Grid, technicalGrid, i, j, k, sysBoundaries);
+                  calculateDJdtTerm(EDJdtDt2Grid, momentsDt2Grid, dPerBGrid, dPerBOldDt2Grid, technicalGrid, i, j, k, sysBoundaries, dt);
                }
             }
          }
