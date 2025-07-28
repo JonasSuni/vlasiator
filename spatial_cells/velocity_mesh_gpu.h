@@ -682,7 +682,7 @@ namespace vmesh {
          gtl_sizepower = globalToLocalMap.getSizePower();
          return blocksSize;
       } else {
-         // GPUTODO: do inside kernel? If ever used.
+         // GPUTODO: do inside kernel? This function is used by SpatialCell::add_velocity_blocks.
          if (ltg_size+blocksSize > ltg_capacity) {
             ltg_capacity = (ltg_size+blocksSize)*BLOCK_ALLOCATION_FACTOR;
             localToGlobalMap.reserve(ltg_capacity,true,stream);
@@ -819,14 +819,14 @@ namespace vmesh {
       #ifdef DEBUG_VMESH
       // Verify that GID and LID match
       if (GID==invalidGlobalID()) {
-         printf("vmesh deleteBlock error: GID is invalidGlobalID!\n");
+         printf("vmesh deleteBlock error: GID is invalidGlobalID! (LID %ul)\n",LID);
       }
       if (LID==invalidLocalID()) {
-         printf("vmesh deleteBlock error: LID is invalidLocalID!\n");
+         printf("vmesh deleteBlock error: LID is invalidLocalID! (GID %ul)\n",GID);
       }
       auto it = globalToLocalMap.device_find(GID);
       if (it == globalToLocalMap.device_end()) {
-         printf("vmesh deleteBlock error: GID does not exist!\n");
+         printf("vmesh deleteBlock error: GID %ul does not exist! (LID %ul)\n",GID,LID);
       } else {
          if (it->second != LID) {
             printf("vmesh deleteBlock error: LID %ul found with GID %ul does not match provided LID %ul!\n",it->second,GID,LID);
@@ -1248,10 +1248,10 @@ namespace vmesh {
       // Verify that GID and LID match
       if (b_tid==0) {
          if (GID==invalidGlobalID()) {
-            printf("vmesh deleteBlock error: GID is invalidGlobalID!\n");
+            printf("vmesh warpDeleteBlock error: GID is invalidGlobalID! (LID %ul)\n",LID);
          }
          if (LID==invalidLocalID()) {
-            printf("vmesh deleteBlock error: LID is invalidLocalID!\n");
+            printf("vmesh warpDeleteBlock error: LID is invalidLocalID! (GID %ul)\n",GID);
          }
       }
       __syncthreads();
@@ -1259,15 +1259,15 @@ namespace vmesh {
       globalToLocalMap.warpFind(GID, retval, b_tid % GPUTHREADS);
       if (b_tid==0) {
          if (retval == invalidLocalID()) {
-            printf("vmesh deleteBlock error: GID does not exist (warpFind(!\n");
+            printf("vmesh warpDeleteBlock error: GID %ul does not exist! (LID %ul)\n",GID,LID);
          } else {
             if (retval != LID) {
-               printf("vmesh deleteBlock error: LID %ul warpFound with GID %ul does not match provided LID %ul!\n",
+               printf("vmesh warpDeleteBlock error: LID %ul warpFound with GID %ul does not match provided LID %ul!\n",
                       retval,GID,LID);
             }
          }
          if (localToGlobalMap.at(LID) != GID) {
-            printf("vmesh deleteBlock error: GID %ul warpFound with LID %ul does not match provided GID %ul!\n",
+            printf("vmesh warpDeleteBlock error: GID %ul warpFound with LID %ul does not match provided GID %ul!\n",
                    localToGlobalMap.at(LID),LID,GID);
          }
       }

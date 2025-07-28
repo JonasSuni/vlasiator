@@ -83,7 +83,7 @@ tabs $tabseq &> /dev/null # suppress special character output, list matches expa
 
 # Get absolute paths
 reference_dir=$( readlink -f $reference_dir )
-reference_revision_full=$( readlink $reference_dir/$reference_revision )
+reference_revision_parsed=$( readlink -f $reference_dir/$reference_revision )
 run_dir=$( readlink -f $run_dir )_$( date +%Y.%m.%d_%H.%M.%S )
 bin=$( readlink -f $bin )
 diffbin=$( readlink -f $diffbin )
@@ -91,16 +91,16 @@ test_dir=$( readlink -f $test_dir)
 
 flags=$(  $run_command $bin  --version |grep CXXFLAGS)
 solveropts=$(echo $flags|sed 's/[-+]//g' | gawk '{for(i = 1;i<=NF;i++) { if( $i=="DDP" || $i=="DFP" || index($i,"PF")|| index($i,"DVEC") || index($i,"SEMILAG") ) printf "__%s", $(i) }}')
-revision=$( $run_command $bin --version |gawk '{if(flag==1) {print $1;flag=0}if ($3=="log") flag=1;}' )
+revision=$( $small_run_command $bin --version |gawk '{if(flag==1) {print $1;flag=0}if ($3=="log") flag=1;}' )
 
 echo "----------"
-echo "This will be verifying ${revision}_$solveropts against $reference_revision"
+echo "This will be verifying ${run_dir}/${revision}_${solveropts} against ${reference_revision_parsed}"
 echo "----------"
 
 #$small_run_command $bin --version > VERSION.txt 2> $GITHUB_WORKSPACE/stderr.txt
 
 echo -e "### Testpackage output:\n" >> $GITHUB_STEP_SUMMARY
-echo "CI_reference pointed to $reference_revision_full" >> $GITHUB_STEP_SUMMARY
+echo "CI_reference pointed to $reference_revision_parsed" >> $GITHUB_STEP_SUMMARY
 
 NONZEROTESTS=0
 ZEROTESTS=0
@@ -110,6 +110,7 @@ FAILEDTESTS=0
 for run in ${run_tests[*]}; do
    # directory for test results
    vlsv_dir=${run_dir}/${test_name[$run]}
+   vlsv_dir_short=${test_name[$run]}
    cfg_dir=${test_dir}/${test_name[$run]}
 
    # Check if folder for new run exists, if not create them, otherwise delete old results
@@ -127,8 +128,7 @@ for run in ${run_tests[*]}; do
    # Run prerequisite script, if it exists
    test -e test_prelude.sh && ./test_prelude.sh
 
-   echo -e "\n"
-   echo "----------"
+   echo -e "\n\n"
    echo "running ${test_name[$run]} "
 
    # Run the actual simulation
@@ -159,12 +159,11 @@ for run in ${run_tests[*]}; do
 
    # Print stored stdout and stderr of simulation
    { {
-   echo "----------"
+   echo "-----------"
    } 2>&1 1>&3 3>&- | tee -a $GITHUB_WORKSPACE/stderr.txt;} 3>&1 1>&2 | tee -a $GITHUB_WORKSPACE/stdout.txt
    reference_result_dir=${reference_dir}/${reference_revision}/${test_name[$run]}
 
    { {
-   echo "--------------------------------"
    echo " ref-time | new-time | speedup |"
    echo "--------------------------------"
    } 2>&1 1>&3 3>&- | tee -a $GITHUB_WORKSPACE/stderr.txt;} 3>&1 1>&2 | tee -a $GITHUB_WORKSPACE/stdout.txt
@@ -184,10 +183,10 @@ for run in ${run_tests[*]}; do
    { {
    tabs 1,12,23 &> /dev/null # match next line
    echo  -e " $refPerf\t$newPerf\t$speedup" | expand -t 1,12,23 # match previous line
-   echo "-------------------------------------------"
+   echo "----------"
    tabs $tabseq &> /dev/null # reset for other printouts
    echo -e " variable\t| absolute diff\t| relative diff |" | expand -t $tabseq # list matches tabs above
-   echo "-------------------------------------------"
+   echo "----------"
    } 2>&1 1>&3 3>&- | tee -a $GITHUB_WORKSPACE/stderr.txt;} 3>&1 1>&2 | tee -a $GITHUB_WORKSPACE/stdout.txt
 
    {
@@ -219,7 +218,7 @@ for run in ${run_tests[*]}; do
            echo "----------"
            continue
        fi
-       echo "Comparing file ${vlsv_dir}/${vlsv} against reference"
+       echo "Comparing file ${vlsv_dir_short}/${vlsv} against reference"
        COMPAREDFILES=$((COMPAREDFILES+1))
        echo $COMPAREDFILES > $RUNNER_TEMP/COMPAREDFILES.txt
        
@@ -250,9 +249,9 @@ for run in ${run_tests[*]}; do
 
            elif [[ "${variables[$i]}" == "ig_"* ]]
            then
-               A=$( $run_command_tools $diffbin --meshname=ionosphere  ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} ${variables[$i]} ${indices[$i]} )
-               relativeValue=$(grep "The relative 0-distance between both datasets" <<< $A |gawk '{print $8}'  )
-               absoluteValue=$(grep "The absolute 0-distance between both datasets" <<< $A |gawk '{print $8}'  )
+               B=$( $run_command_tools $diffbin --meshname=ionosphere  ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} ${variables[$i]} ${indices[$i]} )
+               relativeValue=$(grep "The relative 0-distance between both datasets" <<< $B |gawk '{print $8}'  )
+               absoluteValue=$(grep "The absolute 0-distance between both datasets" <<< $B |gawk '{print $8}'  )
                # print the results
                echo -e " ${variables[$i]}_${indices[$i]}\t  ${absoluteValue}\t  ${relativeValue}" | expand -t $tabseq # list matches tabs above
 
@@ -273,9 +272,9 @@ for run in ${run_tests[*]}; do
 
            elif [ ! "${variables[$i]}" == "proton" ]
            then # Regular vg_ variable
-               A=$( $run_command_tools $diffbin ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} ${variables[$i]} ${indices[$i]} )
-               relativeValue=$(grep "The relative 0-distance between both datasets" <<< $A |gawk '{print $8}'  )
-               absoluteValue=$(grep "The absolute 0-distance between both datasets" <<< $A |gawk '{print $8}'  )
+               C=$( $run_command_tools $diffbin ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} ${variables[$i]} ${indices[$i]} )
+               relativeValue=$(grep "The relative 0-distance between both datasets" <<< $C |gawk '{print $8}'  )
+               absoluteValue=$(grep "The absolute 0-distance between both datasets" <<< $C |gawk '{print $8}'  )
                #print the results
                echo -e " ${variables[$i]}_${indices[$i]}\t  ${absoluteValue}\t  ${relativeValue}" | expand -t $tabseq # list matches tabs above
 
@@ -298,14 +297,15 @@ for run in ${run_tests[*]}; do
            then
                echo "----------"
                echo "Distribution function diff"
-               echo "----------"
-               $run_command_tools $diffbin ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} proton 0
+               # Exclude file names from output to keep report size down
+               D=$( $run_command_tools $diffbin ${reference_result_dir}/${vlsv} ${vlsv_dir}/${vlsv} proton 0 | grep -v -e "File" -e "INFO" )
+               echo -e "$D"
            fi
 
        done # loop over variables
 
        # Check if dt is nonzero
-       timeDiff=$(grep "delta t" <<< $A |gawk '{print $8}'  )
+       timeDiff=$(grep "delta t" <<< $C |gawk '{print $8}'  )
        if (( $(awk 'BEGIN{print ('$timeDiff'!= 0.0)?1:0}') )); then
            if (( $( echo "${timeDiff#-} $MAXDT" | awk '{ if($1 > $2) print 1; else print 0 }' ) )); then
                MAXDT=$timeDiff

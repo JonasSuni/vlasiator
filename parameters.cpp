@@ -64,6 +64,7 @@ uint P::zcells_ini = numeric_limits<uint>::max();
 Real P::t = 0;
 Real P::t_min = 0;
 Real P::t_max = LARGE_REAL;
+Real P::dt_ceil = -1.0; 
 Real P::dt = NAN;
 Real P::vlasovSolverMaxCFL = NAN;
 Real P::vlasovSolverMinCFL = NAN;
@@ -86,6 +87,7 @@ bool P::prepareForRebalance = false;
 vector<CellID> P::localCells;
 
 bool P::adaptGPUWID = true;
+uint P::GPUallocations = 64;
 
 vector<string> P::systemWriteName;
 vector<string> P::systemWritePath;
@@ -105,13 +107,14 @@ vector<pair<string, string>> P::restartWriteHints;
 vector<pair<string, string>> P::restartReadHints;
 
 Real P::saveRestartWalltimeInterval = -1.0;
+uint P::saveRecoverTstepInterval = 0;
 uint P::exitAfterRestarts = numeric_limits<uint>::max();
+uint P::recoverMaxFiles = 0;
 uint64_t P::vlsvBufferSize = 0;
 int P::restartStripeFactor = 0;
 int P::systemStripeFactor = 0;
 string P::restartWritePath = string("");
-
-uint P::transmit = 0;
+string P::recoverWritePath = string("");
 
 bool P::recalculateStencils = true;
 bool P::propagateVlasovAcceleration = true;
@@ -200,7 +203,15 @@ std::vector<Realf> P::amrBoxCenterY;
 std::vector<Realf> P::amrBoxCenterZ;
 std::vector<int> P::amrBoxMaxLevel;
 vector<string> P::blurPassString;
-std::vector<int> P::numPasses; //numpasses
+vector<int> P::numPasses;
+
+bool P::artificialPADiff;
+Realf P::PADcoefficient;
+Realf P::PADCFL;
+int P::PADvbins;
+int P::PADmubins;
+string P::PADnu0 = string("");
+Realf P::PADfudge;
 
 std::array<FsGridTools::Task_t,3> P::manualFsGridDecomposition = {0,0,0};
 std::array<FsGridTools::Task_t,3> P::overrideReadFsGridDecomposition = {0,0,0};
@@ -265,6 +276,9 @@ bool P::addParameters() {
            "Save the complete simulation in given walltime intervals. Negative values disable writes.", -1.0);
    RP::add("io.number_of_restarts", "Exit the simulation after certain number of walltime-based restarts.",
            numeric_limits<uint>::max());
+   RP::add("io.recover_tstep_interval",
+           "Save the complete simulation in given tstep intervals. 0 disables writes.", 0);
+   RP::add("io.number_of_recovers", "Overwrite recovers cyclically after this number of recovers written.", 2);
    RP::add("io.vlsv_buffer_size",
            "Buffer size passed to VLSV writer (bytes, up to uint64_t), default 0 as this is sensible on sisu", 0);
    RP::add("io.write_restart_stripe_factor", "Stripe factor for restart and initial grid writing. Default 0 to inherit.", 0);
@@ -272,6 +286,10 @@ bool P::addParameters() {
    RP::add("io.write_as_float", "If true, write in floats instead of doubles", false);
    RP::add("io.restart_write_path",
            "Path to the location where restart files should be written. Defaults to the local directory, also if the "
+           "specified destination is not writeable.",
+           string("./"));
+   RP::add("io.recover_write_path",
+           "Path to the location where recover files should be written. Defaults to the local directory, also if the "
            "specified destination is not writeable.",
            string("./"));
 
@@ -309,11 +327,11 @@ bool P::addParameters() {
        "Manual FsGridDecomposition for field solver grid stored in a restart file.", 0);
 
    RP::add("gridbuilder.x_min", "Minimum value of the x-coordinate.", NAN);
-   RP::add("gridbuilder.x_max", "Minimum value of the x-coordinate.", NAN);
+   RP::add("gridbuilder.x_max", "Maximum value of the x-coordinate.", NAN);
    RP::add("gridbuilder.y_min", "Minimum value of the y-coordinate.", NAN);
-   RP::add("gridbuilder.y_max", "Minimum value of the y-coordinate.", NAN);
+   RP::add("gridbuilder.y_max", "Maximum value of the y-coordinate.", NAN);
    RP::add("gridbuilder.z_min", "Minimum value of the z-coordinate.", NAN);
-   RP::add("gridbuilder.z_max", "Minimum value of the z-coordinate.", NAN);
+   RP::add("gridbuilder.z_max", "Maximum value of the z-coordinate.", NAN);
    RP::add("gridbuilder.x_length", "Number of cells in x-direction in initial grid.", 0);
    RP::add("gridbuilder.y_length", "Number of cells in y-direction in initial grid.", 0);
    RP::add("gridbuilder.z_length", "Number of cells in z-direction in initial grid.", 0);
@@ -326,6 +344,9 @@ bool P::addParameters() {
    RP::add("gridbuilder.timestep_max",
            "Max. value for timesteps. If t_max limit is hit first, this step will never be reached",
            numeric_limits<uint>::max());
+   RP::add("gridbuilder.dt_ceil",
+           "Maximum simulation dt in seconds.",
+           -1.0);
 
    // Field solver parameters
    RP::add("fieldsolver.maxWaveVelocity",
@@ -342,11 +363,11 @@ bool P::addParameters() {
        "Enable/choose spatial order of the electron pressure gradient term in Ohm's law. 0: off, 1: 1st spatial order.",
        0);
    RP::add("fieldsolver.electronTemperature",
-           "Upstream electron temperature to be used for the electron pressure gradient term (K).", 0.0);
+           "Upstream (anchor point) electron temperature to be used for the electron pressure gradient term (K).", 0.0);
    RP::add("fieldsolver.electronDensity",
-           "Upstream electron density to be used for the electron pressure gradient term (m^-3).", 0.0);
+           "Upstream (anchor point) electron density to be used for the electron pressure gradient term (m^-3).", 0.0);
    RP::add("fieldsolver.electronPTindex",
-           "Polytropic index for electron pressure gradient term. 0 is isobaric, 1 is isothermal, 1.667 is adiabatic "
+           "Polytropic index for the equation of state to solve the electron pressure gradient term. 0 is isobaric, 1 is isothermal, 1.667 is adiabatic "
            "electrons, ",
            0.0);
    RP::add("fieldsolver.maxCFL",
@@ -398,12 +419,12 @@ bool P::addParameters() {
                     string() +
                         "List of data reduction operators (DROs) to add to the grid file output.  Each variable to be "
                         "added has to be on a new line output = XXX. Names are case insensitive.  " +
-                        "Available (20250130): " + "fg_b fg_b_background fg_b_perturbed fg_b_background_vol fg_derivs_b_background fg_e " +
+                        "Available (20250413): " + "fg_b fg_b_background fg_b_perturbed fg_b_background_vol fg_derivs_b_background fg_e " +
                         "vg_rhom vg_rhoq populations_vg_rho " + "fg_rhom fg_rhoq " + "vg_v fg_v populations_vg_v " +
                         "populations_vg_moments_thermal populations_vg_moments_nonthermal " +
                         "populations_vg_effectivesparsitythreshold populations_vg_rho_loss_adjust " +
                         "populations_vg_energydensity populations_vg_precipitationdifferentialflux " +
-                        "populations_vg_heatflux " +
+                        "populations_vg_heatflux " + "populations_vg_1dmuspace " +
                         "populations_vg_nonmaxwellianity " +
                         "vg_maxdt_acceleration vg_maxdt_translation populations_vg_maxdt_acceleration " +
                         "populations_vg_maxdt_translation " +
@@ -423,12 +444,12 @@ bool P::addParameters() {
    RP::addComposing(
        "variables_deprecated.output",
        string() + "List of deprecated names for data reduction operators (DROs). Names are case insensitive. " +
-           "Available (20250130): " + "B BackgroundB fg_BackgroundB PerturbedB fg_PerturbedB " + "E " +
+           "Available (20250413): " + "B BackgroundB fg_BackgroundB PerturbedB fg_PerturbedB " + "E " +
            "Rhom Rhoq populations_Rho " + "V populations_V " +
            "populations_moments_Backstream populations_moments_NonBackstream " +
            "populations_moments_thermal populations_moments_nonthermal " +
            "populations_minvalue populations_EffectiveSparsityThreshold populations_RhoLossAdjust "
-           "populations_rho_loss_adjust" +
+           "populations_rho_loss_adjust populations_1dmuspace " +
            "populations_EnergyDensity populations_PrecipitationFlux populations_precipitationdifferentialflux" +
            "LBweight vg_lbweight vg_loadbalanceweight MaxVdt MaxRdt populations_MaxVdt populations_MaxRdt " +
            "populations_maxdt_acceleration populations_maxdt_translation MaxFieldsdt fg_maxfieldsdt" +
@@ -515,9 +536,19 @@ bool P::addParameters() {
    RP::addComposing("AMR.box_max_level", "max refinement level of the box that is refined");
    RP::add("AMR.transShortPencils", "if true, use one-cell pencils", false);
    RP::addComposing("AMR.filterpasses", string("AMR filter passes for each individual refinement level"));
-
    RP::add("adaptGPUWID", "if true, will halve velocity block counts if GPU is in use and WID==8", true);
+   RP::add("GPUallocations", "How many parallel GPU vlasov allocations to make? (default 64)", 64);
 
+   // Diffusion parameters
+   RP::add("PAD.enable","Enable Artificial pitch-angle diffusion",0);
+   RP::add("PAD.coefficient","Set artificial pitch-angle diffusion coefficient (overriding .DAT file)",-1);
+   RP::add("PAD.CFL","Set CFL condition",0.1);
+   RP::add("PAD.vbins","number of bins for velocity",200);
+   RP::add("PAD.mubins","number of bins for mu",30);
+   RP::add("PAD.file","Path of txt file for nu0", string("NU0BOX.DAT"));
+   RP::add("PAD.fudge","Divide diffusion coefficient nu0 (read from file) by a fudge factor (see Dubart et al 2023)",4);
+   
+   // Fieldtracing
    RP::add("fieldtracing.fieldLineTracer", "Field line tracing method to use for coupling ionosphere and magnetosphere (options are: Euler, BS)", std::string("Euler"));
    RP::add("fieldtracing.tracer_max_allowed_error", "Maximum allowed error for the adaptive field line tracers ", 1000);
    RP::add("fieldtracing.tracer_max_attempts", "Maximum allowed attempts for the adaptive field line tracers", 100);
@@ -557,11 +588,14 @@ void Parameters::getParameters() {
    RP::get("io.write_initial_state", P::writeInitialState);
    RP::get("io.write_full_bgb_data", P::writeFullBGB);
    RP::get("io.restart_walltime_interval", P::saveRestartWalltimeInterval);
+   RP::get("io.recover_tstep_interval", P::saveRecoverTstepInterval);
    RP::get("io.number_of_restarts", P::exitAfterRestarts);
+   RP::get("io.number_of_recovers", P::recoverMaxFiles);
    RP::get("io.vlsv_buffer_size", P::vlsvBufferSize);
    RP::get("io.write_restart_stripe_factor", P::restartStripeFactor);
    RP::get("io.write_system_stripe_factor", P::systemStripeFactor);
    RP::get("io.restart_write_path", P::restartWritePath);
+   RP::get("io.recover_write_path", P::recoverWritePath);
    RP::get("io.write_as_float", P::writeAsFloat);
 
    // Checks for validity of io and restart parameters
@@ -574,6 +608,16 @@ void Parameters::getParameters() {
               << endl;
       }
       P::restartWritePath = prefix;
+   }
+   if (access(&(P::recoverWritePath[0]), W_OK) != 0) {
+      if (myRank == MASTER_RANK) {
+         cerr << "ERROR recover write path " << P::recoverWritePath << " not writeable, defaulting to local directory."
+              << endl;
+      }
+      P::recoverWritePath = prefix;
+   }
+   if (P::recoverMaxFiles == 0) {
+      P::recoverMaxFiles = 1; // If we leave it at zero a manual DORC will divide by zero when computing the index.
    }
    size_t maxSize = 0;
    maxSize = max(maxSize, P::systemWriteTimeInterval.size());
@@ -864,6 +908,7 @@ void Parameters::getParameters() {
    RP::get("AMR.transShortPencils", P::amrTransShortPencils);
    RP::get("AMR.filterpasses", P::blurPassString);
    RP::get("adaptGPUWID", P::adaptGPUWID);
+   RP::get("GPUallocations", P::GPUallocations);
 
    // We need the correct number of parameters for the AMR boxes
    if(   P::amrBoxNumber != (int)P::amrBoxHalfWidthX.size()
@@ -934,6 +979,11 @@ void Parameters::getParameters() {
       MPI_Abort(MPI_COMM_WORLD, 1);
    }
 
+   #ifdef USE_GPU
+   // Ensure GPU allocation count figure is at least equal to max threads
+   P::GPUallocations = std::max(P::GPUallocations,gpu_getMaxThreads());
+   #endif
+
    // Set some parameter values.
    P::dx_ini = (P::xmax - P::xmin) / P::xcells_ini;
    P::dy_ini = (P::ymax - P::ymin) / P::ycells_ini;
@@ -943,6 +993,8 @@ void Parameters::getParameters() {
 
    RP::get("gridbuilder.t_max", P::t_max);
    RP::get("gridbuilder.timestep_max", P::tstep_max);
+
+   RP::get("gridbuilder.dt_ceil", P::dt_ceil);
 
    if (P::dynamicTimestep)
       P::dt = 0.0; // if dynamic timestep then first dt is always 0
@@ -959,10 +1011,10 @@ void Parameters::getParameters() {
    RP::get("fieldsolver.resistivity", P::resistivity);
    RP::get("fieldsolver.diffusiveEterms", P::fieldSolverDiffusiveEterms);
    RP::get("fieldsolver.ohmHallTerm", P::ohmHallTerm);
-   RP::get("fieldsolver.ohmGradPeTerm", P::ohmGradPeTerm);
-   RP::get("fieldsolver.electronTemperature", P::electronTemperature);
-   RP::get("fieldsolver.electronDensity", P::electronDensity);
-   RP::get("fieldsolver.electronPTindex", P::electronPTindex);
+   RP::get("fieldsolver.ohmGradPeTerm", P::ohmGradPeTerm); // Which order solver to use for fieldsolver eGradPe term (supported: 0 for off, 1 for first-order)
+   RP::get("fieldsolver.electronTemperature", P::electronTemperature); // Electron temperature associated with anchor point, e.g. incoming solar wind
+   RP::get("fieldsolver.electronDensity", P::electronDensity); // Electron density associated with anchor point, e.g. incoming solar wind
+   RP::get("fieldsolver.electronPTindex", P::electronPTindex); // Polytropic index for solving electron equation of state to use in eGradPe term
    RP::get("fieldsolver.maxCFL", P::fieldSolverMaxCFL);
    RP::get("fieldsolver.minCFL", P::fieldSolverMinCFL);
 
@@ -1065,6 +1117,14 @@ void Parameters::getParameters() {
       P::systemWrites.push_back(0);
    }
 
+   RP::get("PAD.enable", P::artificialPADiff);   
+   RP::get("PAD.coefficient", P::PADcoefficient);
+   RP::get("PAD.CFL",P::PADCFL);
+   RP::get("PAD.vbins",P::PADvbins);
+   RP::get("PAD.mubins",P::PADmubins);
+   RP::get("PAD.file",P::PADnu0);
+   RP::get("PAD.fudge",P::PADfudge);
+
    RP::get("fieldtracing.fieldLineTracer", tracerString);
    RP::get("fieldtracing.tracer_max_allowed_error", FieldTracing::fieldTracingParameters.max_allowed_error);
    RP::get("fieldtracing.tracer_max_attempts", FieldTracing::fieldTracingParameters.max_field_tracer_attempts);
@@ -1101,3 +1161,5 @@ void Parameters::getParameters() {
       abort();
    }
 }
+
+

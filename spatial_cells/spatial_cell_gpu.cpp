@@ -27,7 +27,7 @@
 #include "../object_wrapper.h"
 #include "../velocity_mesh_parameters.h"
 
-#include "spatial_cell_kernels.hpp"
+#include "spatial_cell_gpu_kernels.hpp"
 
 // INIT_VMESH_SIZE and INIT_MAP_SIZE defined in arch/gpu_base.hpp
 
@@ -332,8 +332,8 @@ namespace spatial_cell {
    /** Recapacitates local temporary vectors based on guidance counter
     */
    void SpatialCell::applyReservation(const uint popID) {
-      const size_t reserveSize = populations[popID].reservation;// * BLOCK_ALLOCATION_FACTOR;
-      size_t newReserve = populations[popID].reservation * BLOCK_ALLOCATION_FACTOR;//BLOCK_ALLOCATION_PADDING;
+      const size_t reserveSize = populations[popID].reservation;
+      size_t newReserve = populations[popID].reservation * BLOCK_ALLOCATION_PADDING;
       const vmesh::LocalID HashmapReqSize = ceil(log2(reserveSize))+1;
       gpuStream_t stream = gpu_getStream();
       // Now uses host-cached values
@@ -344,13 +344,15 @@ namespace spatial_cell {
          velocity_block_with_content_list_capacity = newReserve;
          dev_velocity_block_with_content_list = velocity_block_with_content_list->upload<true>(stream);
       }
-      if (vbwcl_sizePower < HashmapReqSize) {
-         vbwcl_sizePower = HashmapReqSize;
+      // This one is also used in acceleration for adding new blocks to the mesh, so should have more room. 
+      if (vbwcl_sizePower < HashmapReqSize+1) {
+         vbwcl_sizePower = HashmapReqSize+1;
          ::delete velocity_block_with_content_map;
          void *buf = malloc(sizeof(Hashinator::Hashmap<vmesh::GlobalID,vmesh::LocalID>));
          velocity_block_with_content_map = ::new (buf) Hashinator::Hashmap<vmesh::GlobalID,vmesh::LocalID>(vbwcl_sizePower);
          dev_velocity_block_with_content_map = velocity_block_with_content_map->upload<true>(stream);
       }
+      // Here the regular size estimate should be enough.
       if (vbwncl_sizePower < HashmapReqSize) {
          vbwncl_sizePower = HashmapReqSize;
          ::delete velocity_block_with_no_content_map;
@@ -359,8 +361,9 @@ namespace spatial_cell {
          dev_velocity_block_with_no_content_map = velocity_block_with_no_content_map->upload<true>(stream);
       }
       // These lists are also used in acceleration, where sometimes, very many blocks may be added.
+      // (Maximum possible is all existing blocks moved to a new location + 2 per column)
       // Thus, this one list needs to have larger capacity than the others..
-      if (list_with_replace_new_capacity < reserveSize * acc_reserve_multiplier) {
+      if (list_with_replace_new_capacity < reserveSize * acc_reserve_multiplier + 2*gpu_largest_columnCount) {
          list_with_replace_new->reserve(newReserve * acc_reserve_multiplier,true);
          list_with_replace_new_capacity = newReserve * acc_reserve_multiplier;
          dev_list_with_replace_new = list_with_replace_new->upload<true>(stream);
@@ -408,14 +411,12 @@ namespace spatial_cell {
       const uint cpuThreadID = gpu_getThread();
       const gpuStream_t stream = gpu_getStream();
 
-      phiprof::Timer adjustBlocksTimer {"Adjust velocity blocks"};
       vmesh::VelocityMesh* host_vmesh    = populations[popID].vmesh;
       vmesh::VelocityMesh* dev_vmesh    = populations[popID].dev_vmesh;
       vmesh::GlobalID* _withContentData = velocity_block_with_content_list->data();
 
       // Evaluate velocity halo for local content blocks
       if (velocity_block_with_content_list_size>0) {
-         //phiprof::Timer blockHaloTimer {"Block halo kernel"};
          const int addWidthV = getObjectWrapper().particleSpecies[popID].sparseBlockAddWidthV;
          if (addWidthV!=1) {
             std::cerr<<"Warning! "<<__FILE__<<":"<<__LINE__<<" Halo extent is not 1, unsupported size."<<std::endl;
@@ -433,7 +434,6 @@ namespace spatial_cell {
             );
          CHK_ERR( gpuPeekAtLastError() );
          //CHK_ERR( gpuStreamSynchronize(stream) );
-         //blockHaloTimer.stop();
       }
 
       /** Neighbour inclusion: GPU block adjusment now happens via batch calls.
@@ -468,7 +468,6 @@ namespace spatial_cell {
          CHK_ERR( gpuMallocAsync((void**)&dev_neigh_Nvbwcls, neighbours_count*sizeof(vmesh::LocalID), stream) );
          CHK_ERR( gpuMemcpyAsync(dev_neigh_vbwcls, neigh_vbwcls.data(), neighbours_count*sizeof(vmesh::GlobalID*), gpuMemcpyHostToDevice, stream) );
          CHK_ERR( gpuMemcpyAsync(dev_neigh_Nvbwcls, neigh_Nvbwcls.data(), neighbours_count*sizeof(vmesh::LocalID), gpuMemcpyHostToDevice, stream) );
-         //phiprof::Timer neighHaloTimer {"Neighbour halo kernel"};
          // For NVIDIA/CUDA, we dan do 32 neighbour GIDs and 32 threads per warp in a single block.
          // For AMD/HIP, we dan do 16 neighbour GIDs and 64 threads per warp in a single block
          // This is handled in-kernel.
@@ -500,7 +499,6 @@ namespace spatial_cell {
             }
          }
          //CHK_ERR( gpuStreamSynchronize(stream) );
-         //neighHaloTimer.stop();
       }
       *****/
 
@@ -566,10 +564,8 @@ namespace spatial_cell {
       vmesh::LocalID nBlocksAfterAdjust = adjust_velocity_blocks_caller(popID);
 
       // Perform hashmap cleanup here (instead of at acceleration mid-steps)
-      phiprof::Timer cleanupTimer {"Hashinator cleanup"};
       populations[popID].vmesh->gpu_cleanHashMap(stream);
       populations[popID].Upload();
-      cleanupTimer.stop();
 
       #ifdef DEBUG_SPATIAL_CELL
       const size_t vmeshSize = (populations[popID].vmesh)->size();
@@ -590,14 +586,11 @@ namespace spatial_cell {
       Call GPU kernel with all necessary information for creation and deletion of blocks.
    **/
    vmesh::LocalID SpatialCell::adjust_velocity_blocks_caller(const uint popID) {
-      phiprof::Timer addRemoveTimer {"GPU add and remove blocks"};
-
       const uint cpuThreadID = gpu_getThread();
       const gpuStream_t stream = gpu_getStream();
       host_returnRealf[cpuThreadID][0] = 0; // host_rhoLossAdjust
       // populations[popID].vmesh->print();
       // Grow the vmesh and block container, if necessary. Try performing this on-device, if possible.
-      phiprof::Timer preparationTimer {"GPU resize mesh on-device"};
       resize_vbc_kernel_pre<<<1, 1, 0, stream>>> (
          populations[popID].dev_vmesh,
          populations[popID].dev_blockContainer,
@@ -616,10 +609,8 @@ namespace spatial_cell {
       const vmesh::LocalID nBlocksAfterAdjust = host_returnLID[cpuThreadID][1];
       const vmesh::LocalID nBlocksToChange = host_returnLID[cpuThreadID][2];
       const vmesh::LocalID resizeDevSuccess = host_returnLID[cpuThreadID][3];
-      preparationTimer.stop();
       if ( (nBlocksAfterAdjust > nBlocksBeforeAdjust) && (resizeDevSuccess == 0)) {
          //GPUTODO is _FACTOR enough instead of _PADDING?
-         phiprof::Timer preparationHostTimer {"GPU resize mesh on host"};
          populations[popID].vmesh->setNewCapacity(nBlocksAfterAdjust*BLOCK_ALLOCATION_PADDING);
          populations[popID].vmesh->setNewSize(nBlocksAfterAdjust);
          populations[popID].blockContainer->setNewCapacity(nBlocksAfterAdjust*BLOCK_ALLOCATION_PADDING);
@@ -631,7 +622,6 @@ namespace spatial_cell {
          return nBlocksAfterAdjust;
       }
 
-      phiprof::Timer addRemoveKernelTimer {"GPU add and remove blocks kernel"};
       // Each GPU block / workunit could handle several Vlasiator velocity blocks at once.
       // However, thread syncs inside the kernel prevent this.
       // const uint vlasiBlocksPerWorkUnit = WARPSPERBLOCK * GPUTHREADS / WID3;
@@ -673,13 +663,11 @@ namespace spatial_cell {
 
       CHK_ERR( gpuStreamSynchronize(stream) );
       this->populations[popID].RHOLOSSADJUST += host_returnRealf[cpuThreadID][0];
-      addRemoveKernelTimer.stop();
 
       // DEBUG output after kernel
       #ifdef DEBUG_SPATIAL_CELL
       const vmesh::LocalID nAll = populations[popID].vmesh->size();
       if (nAll!=nBlocksAfterAdjust) {
-         //phiprof::Timer debugTimer {"Vmesh and VBC debug output"};
          populations[popID].vmesh->gpu_prefetchHost();
          CHK_ERR( gpuStreamSynchronize(stream) );
          printf("after kernel, size is %d should be %d\n",nAll,nBlocksAfterAdjust);
@@ -706,26 +694,20 @@ namespace spatial_cell {
    void SpatialCell::update_velocity_block_content_lists(const uint popID) {
       debug_population_check(popID);
       const gpuStream_t stream = gpu_getStream();
-      // phiprof::Timer updateListsTimer {"GPU update spatial cell block lists"};
 
-      phiprof::Timer reservationTimer {"GPU apply reservation"};
       applyReservation(popID);
-      reservationTimer.stop();
 
-      phiprof::Timer clearTimer {"GPU clear maps"};
       velocity_block_with_content_list_size = 0;
       velocity_block_with_content_map->clear<false>(Hashinator::targets::device,stream,std::pow(2,vbwcl_sizePower));
       velocity_block_with_no_content_map->clear<false>(Hashinator::targets::device,stream,std::pow(2,vbwncl_sizePower));
       CHK_ERR( gpuStreamSynchronize(stream) );
-      clearTimer.stop();
-      phiprof::Timer sizeTimer {"GPU size"};
+
       const uint nBlocks = populations[popID].vmesh->size();
       if (nBlocks==0) {
          return;
       }
       CHK_ERR( gpuStreamSynchronize(stream) );
-      sizeTimer.stop();
-      phiprof::Timer updateListsTimer {"GPU update spatial cell block lists"};
+
       const Real velocity_block_min_value = getVelocityBlockMinValue(popID);
       // Each GPU block / workunit can handle several Vlasiator velocity blocks at once. (TODO FIX)
       //const uint vlasiBlocksPerWorkUnit = WARPSPERBLOCK * GPUTHREADS / WID3;
@@ -820,7 +802,8 @@ namespace spatial_cell {
             if (receiving) {
                // Set population size based on mpi_number_of_blocks transferred earlier.
                // Does not need to be cleared. Vmesh map and VBC will be prepared in prepare_to_receive_blocks.
-               populations[activePopID].vmesh->setNewSize(populations[activePopID].N_blocks);
+               // populations[activePopID].vmesh->setNewSize(populations[activePopID].N_blocks);
+               this->dev_resize_vmesh(activePopID,populations[activePopID].N_blocks);
                //populations[activePopID].vmesh->setNewSizeClear(populations[activePopID].N_blocks);
                //setNewSizeClear(activePopID,populations[activePopID].N_blocks);
             } else {
@@ -1045,7 +1028,6 @@ namespace spatial_cell {
     * have not been adapted to this new list. Here we re-initialize
     * the cell with empty blocks based on the new list.*/
    void SpatialCell::prepare_to_receive_blocks(const uint popID) {
-      phiprof::Timer setGridTimer {"GPU init/receive blocks: set grid"};
       setNewSizeClear(popID);
       // As the globalToLocalMap is empty, instead of calling
       // vmesh->setGrid() we can update both that and the block
@@ -1113,20 +1095,22 @@ namespace spatial_cell {
     * @return True on success.*/
    bool SpatialCell::shrink_to_fit() {
       bool success = true;
-      return success;
-      // GPUTODO: Make it possible to recapacitate down with GPU cells.
-      for (size_t p=0; p<populations.size(); ++p) {
-         const uint64_t amount
-            = 2 + populations[p].blockContainer->size()
-            * populations[p].blockContainer->getBlockAllocationFactor();
-
-         // Allow capacity to be a bit large than needed by number of blocks, shrink otherwise
-         if (populations[p].blockContainer->capacity() > amount ) {
-            if (populations[p].blockContainer->setNewCapacity(amount) == false) {
+      return true; // on AMD, shrink_to_fit appears broken.
+      size_t largestAmount = 0;
+      for (size_t popID=0; popID<populations.size(); ++popID) {
+         const vmesh::LocalID amount
+            = 2 + populations[popID].blockContainer->size()
+            * populations[popID].blockContainer->getBlockAllocationFactor();
+         largestAmount = std::max(largestAmount,(size_t)populations[popID].blockContainer->size());
+         // Allow capacity to be a bit larger than needed by number of blocks, shrink otherwise
+         if (populations[popID].blockContainer->capacity() > amount ) {
+            if (populations[popID].blockContainer->setNewCapacityShrink(amount) == false) {
                success = false;
             }
+            populations[popID].Upload();
          }
       }
+      largestvmesh = largestAmount;
       return success;
    }
    void SpatialCell::printMeshSizes() {

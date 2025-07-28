@@ -15,7 +15,7 @@
 
 # If 1, the reference vlsv files are generated
 # if 0 then we check the v1 against reference files
-create_verification_files=1
+create_verification_files=0
 
 # folder for all reference data 
 reference_dir="/proj/group/spacephysics/vlasiator_testpackage/"
@@ -25,7 +25,7 @@ bin="/proj/USERNAME/BINARYNAME"
 diffbin="/proj/group/spacephysics/vlasiator_testpackage/vlsvdiff_DP_carrington"
 
 #compare agains which revision
-#reference_revision="c36241b84ce8179f7491ebf2a94c377d7279e8c9__DACC_SEMILAG_PQM__DTRANS_SEMILAG_PPM__DDP__DDPF__DVEC4D_AGNER"
+#reference_revision="CI_reference"
 reference_revision="current"
 
 module purge
