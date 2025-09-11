@@ -61,7 +61,7 @@ bool DensityShear::initialize(void) {
          std::cout << "Initialized multi-wave turbulence simulation\n";
          std::cout << "Background field strength: " << B0 << " T\n";
          std::cout << "Alfvén speed: " << VA << " m/s\n";
-         std::cout << "a: " << angle << " m\n";
+         std::cout << "a: " << a << " m\n";
       }
    }
 
@@ -103,6 +103,7 @@ Realf DensityShear::fillPhaseSpace(spatial_cell::SpatialCell *cell,
 
       creal mass = physicalconstants::MASS_PROTON;
       creal mu0 = physicalconstants::MU_0;
+      creal kB = physicalconstants::K_B;
       Real ux = 0.0, uy = 0.0, uz = 0.0;
 
       // for (int idx = 0; idx < nWaves; idx++) {
