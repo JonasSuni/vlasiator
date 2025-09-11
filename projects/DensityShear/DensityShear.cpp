@@ -124,7 +124,7 @@ Realf DensityShear::fillPhaseSpace(spatial_cell::SpatialCell *cell,
       creal initV0Z = uz;
 
       Real initRho = n0 * (exp(-y*y/a/a) + 0.01);
-      Real initT = (T0 - B0*((exp(-y*y/a/a) + 0.01))/n0/kB) / (exp(-y*y/a/a) + 0.01);
+      Real initT = (T0 - B0*B0*((exp(-y*y/a/a) + 0.01))*((exp(-y*y/a/a) + 0.01))/n0/kB) / (exp(-y*y/a/a) + 0.01);
 
       #ifdef USE_GPU
       vmesh::VelocityMesh *vmesh = cell->dev_get_velocity_mesh(popID);
