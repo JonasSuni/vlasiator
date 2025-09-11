@@ -20,18 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef WHISTLERTEST_H
-#define WHISTLERTEST_H
+#ifndef DENSITYSHEAR_H
+#define DENSITYSHEAR_H
 
 #include "../../definitions.h"
 #include "../project.h"
 
 namespace projects {
 
-   class WhistlerTest : public Project {
+   class DensityShear : public Project {
    public:
-      WhistlerTest();
-      virtual ~WhistlerTest();
+      DensityShear();
+      virtual ~DensityShear();
 
       virtual bool initialize(void);
       static void addParameters(void);
@@ -51,17 +51,10 @@ namespace projects {
       Real B0;       // Background magnetic field strength
       Real n0;       // Background number density
       Real VA;      // Alfvén speed
-      Real angle;   // Angle between wave vector and B0
-      Real angle_rad;
-
-      // Whistler parameters
-      Real amplitude;   // Initial magnetic field perturbation amplitude
-      Real kx;
-      Real ky;
-      Real kz;
+      Real a;   
 
       bool verbose;
-   }; // class WhistlerTest
+   }; // class DensityShear
 } // namespace projects
 
 #endif

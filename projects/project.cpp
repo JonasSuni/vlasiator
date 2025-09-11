@@ -55,6 +55,7 @@
 #include "Shocktest/Shocktest.h"
 #include "LossCone/LossCone.h"
 #include "WhistlerTest/WhistlerTest.h"
+#include "DensityShear/DensityShear.h"
 #include "../sysboundary/sysboundarycondition.h"
 
 #ifdef DEBUG_VLASIATOR
@@ -100,6 +101,7 @@ namespace projects {
       projects::Shocktest::addParameters();
       projects::LossCone::addParameters();
       projects::WhistlerTest::addParameters();
+      projects::DensityShear::addParameters();
       RP::add("Project_common.seed", "Seed for the RNG", 42);
 
    }
@@ -728,6 +730,9 @@ Project* createProject() {
    }
    if(Parameters::projectName == "WhistlerTest") {
       rvalue = new projects::WhistlerTest;
+   }
+   if(Parameters::projectName == "DensityShear") {
+      rvalue = new projects::DensityShear;
    }
 
 
