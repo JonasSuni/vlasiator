@@ -49,16 +49,10 @@ bool DensityShear::initialize(void) {
    creal gamma = 5.0 / 3.0;
    creal mu0 = physicalconstants::MU_0;
 
-   kx = 2 * M_PI / (Parameters::xmax-Parameters::xmin);
-   ky = 2 * M_PI / (Parameters::ymax-Parameters::ymin);
-   kz = 2 * M_PI / (Parameters::zmax-Parameters::zmin);
-
    rho0 = m * n0; // Mass density
 
    // Calculate Alfvén speed
    VA = B0 / sqrt(mu0 * rho0);
-
-   angle_rad = angle * M_PI / 180.0;
 
    if (verbose) {
       int myRank;
