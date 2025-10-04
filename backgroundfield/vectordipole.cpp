@@ -75,7 +75,8 @@ double VectorDipole::operator()( double x, double y, double z, coordinate compon
    if(r[0]>=xlimit[1]){
       //set zero or IMF field and derivatives outside "zero x limit"
       if(derivative == 0) {
-         return IMF[component]; 
+         // return IMF[component]; 
+         return 0.0;
       } else {
          return 0.0;
       }
