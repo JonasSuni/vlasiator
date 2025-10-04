@@ -93,7 +93,7 @@ double VectorDipole::operator()( double x, double y, double z, coordinate compon
 
    if((derivative == 0) && (r[0] <= xlimit[0])) {
       // Full dipole field within full xlimit
-      return B + IMFcomp;
+      return B - IMFcomp;
    }
 
    if((derivative == 1) && (r[0] <= xlimit[0])){
@@ -137,11 +137,11 @@ double VectorDipole::operator()( double x, double y, double z, coordinate compon
    const double dS2dx = -(30.*ss*ss - 60.*ss*s + 30.*ss)/(xlimit[1]-xlimit[0]);
 
    // Smootherstep for IMF
-   const double IMFs = -(r[0]-xlimit[0])/(xlimit[1]-xlimit[0]);
+   const double IMFs = (r[0]-xlimit[0])/(xlimit[1]-xlimit[0]);
    const double IMFss = IMFs*IMFs;
    // Smootherstep and its x-directional derivative
-   const double IMFS2 = 6.*IMFss*IMFss*IMFs - 15.*IMFss*IMFss + 10.*IMFss*IMFs;
-   const double IMFdS2dx = -(30.*IMFss*IMFss - 60.*IMFss*IMFs + 30.*IMFss)/(xlimit[1]-xlimit[0]);
+   const double IMFS2 = 6.*IMFss*IMFss*IMFs - 15.*IMFss*IMFss + 10.*IMFss*IMFs - 1.;
+   const double IMFdS2dx = (30.*IMFss*IMFss - 60.*IMFss*IMFs + 30.*IMFss)/(xlimit[1]-xlimit[0]);
 
    // Cartesian derivatives of S2
    double dS2cart[3];
