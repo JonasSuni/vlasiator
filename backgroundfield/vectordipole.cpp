@@ -89,10 +89,11 @@ double VectorDipole::operator()( double x, double y, double z, coordinate compon
    const double r5 = (r2*r2*r1);
    const double rdotq=q[0]*r[0] + q[1]*r[1] +q[2]*r[2];   
    const double B=( 3*r[component]*rdotq-q[component]*r2)/r5;
+   const double IMFcomp=IMF[component];
 
    if((derivative == 0) && (r[0] <= xlimit[0])) {
       // Full dipole field within full xlimit
-      return B;
+      return B + IMFcomp;
    }
 
    if((derivative == 1) && (r[0] <= xlimit[0])){
