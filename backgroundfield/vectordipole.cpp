@@ -269,12 +269,12 @@ double VectorDipole::operator()( double x, double y, double z, coordinate compon
       //IMFdelAx[1] = -0.5*IMF[2];
       //IMFdelAx[2] =  0.5*IMF[1];
       double IMFdelAy[3];
-      IMFdelAy[0] =  -0.5*IMF[2];
+      IMFdelAy[0] =  0.5*IMF[2];
       IMFdelAy[1] = 0.0;
-      IMFdelAy[2] = 0.5*IMF[0];
+      IMFdelAy[2] = -0.5*IMF[0];
       double IMFdelAz[3];
-      IMFdelAz[0] = 0.5*IMF[1];
-      IMFdelAz[1] =  -0.5*IMF[0];
+      IMFdelAz[0] = -0.5*IMF[1];
+      IMFdelAz[1] =  0.5*IMF[0];
       IMFdelAz[2] = 0.0;
 
       // Calculate del (dS2/dx), del (dS2/dy), del (dS2/dz)
