@@ -155,10 +155,11 @@ namespace SBC {
       for (uint popID = 0; popID < getObjectWrapper().particleSpecies.size(); ++popID) {
          setCellsFromTemplate(mpiGrid, popID);
       }
-      setBFromTemplate(mpiGrid, perBGrid, BgBGrid);
+      setBFromTemplate(mpiGrid, technicalGrid, perBGrid, BgBGrid);
    }
 
    void Inflow::updateState(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>& mpiGrid,
+                            FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
                             FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
                             FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
                             creal t) {
@@ -176,7 +177,7 @@ namespace SBC {
          setCellsFromTemplate(mpiGrid, popID);
       }
 
-      setBFromTemplate(mpiGrid, perBGrid, BgBGrid);
+      setBFromTemplate(mpiGrid, technicalGrid, perBGrid, BgBGrid);
 
       // Ensure up-to-date velocity block counts for all neighbours
       for (uint popID=0; popID<getObjectWrapper().particleSpecies.size(); ++popID) {
@@ -277,6 +278,7 @@ namespace SBC {
    }
 
    void Inflow::setBFromTemplate(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>& mpiGrid,
+                                 FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
                                  FsGrid<array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH>& perBGrid,
                                  FsGrid<array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid) {
       std::array<bool, 6> isThisCellOnAFace;
@@ -286,7 +288,6 @@ namespace SBC {
          for (FsGridTools::FsIndex_t j = 0; j < gridDims[1]; j++) {
             for (FsGridTools::FsIndex_t i = 0; i < gridDims[0]; i++) {
                const auto coords = perBGrid.getPhysicalCoords(i, j, k);
-
                // TODO: This code up to determineFace() should be in a separate
                // function, it gets called in a lot of places.
                // Shift to the center of the fsgrid cell
@@ -309,7 +310,7 @@ namespace SBC {
                              dy, dz);
 
                for (uint iface = 0; iface < 6; iface++) {
-                  if (facesToProcess[iface] && isThisCellOnAFace[iface]) {
+                  if (facesToProcess[iface] && isThisCellOnAFace[iface] && !(P::isRestart && this->applyUponRestart && technicalGrid.get(i,j,k)->SOLVE && technicalGrid.get(i,j,k)->sysBoundaryLayer == 1)) {
                      perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBX) = templateB[iface][0] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBXVDCORR);
                      perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBY) = templateB[iface][1] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBYVDCORR);
                      perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBZ) = templateB[iface][2] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZVDCORR);
