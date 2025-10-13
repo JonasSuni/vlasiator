@@ -634,7 +634,7 @@ void SysBoundary::updateState(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometr
    if (isAnyDynamic()) {
       for(auto& b : sysBoundaries) {
          if (b->isDynamic()) {
-            b->updateState(mpiGrid, perBGrid, BgBGrid, t);
+            b->updateState(mpiGrid, technicalGrid, perBGrid, BgBGrid, t);
          }
       }
    }
