@@ -318,13 +318,13 @@ namespace SBC {
 
                for (uint iface = 0; iface < 6; iface++) {
                   if (facesToProcess[iface] && isThisCellOnAFace[iface]) {
-                     if (resetSolved || (bitfield & compute::BX) == compute::BX) {
+                     if (resetSolved || (bitfield & compute::BX) == compute::BX || technicalGrid.get(i,j,k)->sysBoundaryLayer != 1) {
                         perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBX) = templateB[iface][0] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBXVDCORR);
                      }
-                     if (resetSolved || (bitfield & compute::BY) == compute::BY) {
+                     if (resetSolved || (bitfield & compute::BY) == compute::BY || technicalGrid.get(i,j,k)->sysBoundaryLayer != 1) {
                         perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBY) = templateB[iface][1] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBYVDCORR);
                      }
-                     if (resetSolved || (bitfield & compute::BZ) == compute::BZ) {
+                     if (resetSolved || (bitfield & compute::BZ) == compute::BZ || technicalGrid.get(i,j,k)->sysBoundaryLayer != 1) {
                         perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBZ) = templateB[iface][2] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZVDCORR);
                      }
                      break;
