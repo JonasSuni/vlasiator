@@ -341,6 +341,11 @@ void initializeGrids(
    BgBGrid.updateGhostCells();
    EGrid.updateGhostCells();
 
+   if (P::isRestart) {
+      //initial state for sys-boundary cells, will skip those not set to be reapplied at restart
+      sysBoundaries.applyInitialState(mpiGrid, technicalGrid, perBGrid, BgBGrid, project);
+   }
+
    // This will only have the BGB set up properly at this stage but we need the BGBvol for the Vlasov boundaries below.
    volGrid.updateGhostCells();
    fsGridGhostTimer.stop();
