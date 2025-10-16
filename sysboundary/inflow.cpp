@@ -318,19 +318,15 @@ namespace SBC {
 
                for (uint iface = 0; iface < 6; iface++) {
                   if (facesToProcess[iface] && isThisCellOnAFace[iface]) {
-                     // if (resetSolved || (bitfield & compute::BX) != compute::BX) {
-                     //    perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBX) = templateB[iface][0] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBXVDCORR);
-                     // }
-                     // if (resetSolved || (bitfield & compute::BY) != compute::BY) {
-                     //    perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBY) = templateB[iface][1] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBYVDCORR);
-                     // }
-                     // if (resetSolved || (bitfield & compute::BZ) != compute::BZ) {
-                     //    perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBZ) = templateB[iface][2] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZVDCORR);
-                     // }
-                     perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBX) = templateB[iface][0] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBXVDCORR);
-                     perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBY) = templateB[iface][1] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBYVDCORR);
-                     perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBZ) = templateB[iface][2] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZVDCORR);
-                     
+                     if (resetSolved || (bitfield & compute::BX) != compute::BX) {
+                        perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBX) = templateB[iface][0] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBXVDCORR);
+                     }
+                     if (resetSolved || (bitfield & compute::BY) != compute::BY) {
+                        perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBY) = templateB[iface][1] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBYVDCORR);
+                     }
+                     if (resetSolved || (bitfield & compute::BZ) != compute::BZ) {
+                        perBGrid.get(i, j, k)->at(fsgrids::bfield::PERBZ) = templateB[iface][2] + BgBGrid.get(i,j,k)->at(fsgrids::bgbfield::BGBZVDCORR);
+                     }
                      break;
                   }
                }
