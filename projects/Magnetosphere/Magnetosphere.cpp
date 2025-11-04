@@ -468,7 +468,12 @@ namespace projects {
 
       phiprof::Timer addConstantTimer {"add-constant-field"};
       // Superimpose constant background field if needed
-      if(this->constBgB[0] != 0.0 || this->constBgB[1] != 0.0 || this->constBgB[2] != 0.0) {
+      if(this->dipoleInflowB[0] != 0.0 || this->dipoleInflowB[1] != 0.0 || this->dipoleInflowB[2] != 0.0) {
+         ConstantField bgConstantField;
+         bgConstantField.initialize(this->dipoleInflowB[0], this->dipoleInflowB[1], this->dipoleInflowB[2]);
+         setBackgroundField(bgConstantField, BgBGrid, true);
+         SBC::ionosphereGrid.setConstantBackgroundField(this->dipoleInflowB);
+      } else if(this->constBgB[0] != 0.0 || this->constBgB[1] != 0.0 || this->constBgB[2] != 0.0) {
          ConstantField bgConstantField;
          bgConstantField.initialize(this->constBgB[0], this->constBgB[1], this->constBgB[2]);
          setBackgroundField(bgConstantField, BgBGrid, true);
