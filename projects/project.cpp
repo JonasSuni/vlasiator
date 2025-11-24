@@ -39,6 +39,7 @@
 #include "Fluctuations/Fluctuations.h"
 #include "Harris/Harris.h"
 #include "Reconnection/Reconnection.h"
+#include "GEMchallenge/GEMchallenge.h"
 #include "KHB/KHB.h"
 #include "Larmor/Larmor.h"
 #include "Magnetosphere/Magnetosphere.h"
@@ -87,6 +88,7 @@ namespace projects {
       projects::Fluctuations::addParameters();
       projects::Harris::addParameters();
       projects::Reconnection::addParameters();
+      projects::GEMchallenge::addParameters();
       projects::KHB::addParameters();
       projects::Larmor::addParameters();
       projects::Magnetosphere::addParameters();
@@ -688,6 +690,9 @@ Project* createProject() {
    }
    if(Parameters::projectName == "Reconnection") {
       rvalue = new projects::Reconnection;
+   }
+   if(Parameters::projectName == "GEMchallenge") {
+      rvalue = new projects::GEMchallenge;
    }
    if(Parameters::projectName == "KHB") {
       rvalue = new projects::KHB;
