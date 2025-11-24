@@ -43,8 +43,8 @@ namespace projects {
    void GEMchallenge::addParameters(){
       typedef Readparameters RP;
       RP::add("GEMchallenge.Scale_size", "GEMchallenge sheet scale size (m)", 150000.0);
-      RP::add("GEMchallenge.VX0", "Initial Velocity in x-direction", 1e4);
-      RP::add("GEMchallenge.BX0", "Magnetic field at infinity (T)", 1);
+      RP::add("GEMchallenge.VX0", "Initial Velocity in x-direction", 0);
+      RP::add("GEMchallenge.BX0", "Magnetic field at infinity (T)", 1e-8);
       RP::add("GEMchallenge.BY0", "Magnetic field at infinity (T)", 0.0);
       RP::add("GEMchallenge.BZ0", "Magnetic field at infinity (T)", 0.0);
 
@@ -210,7 +210,7 @@ namespace projects {
                   Bx_island = -M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lz;
                   Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lx;
 
-                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * tanh((xyz[1] + 0.5 * perBGrid.DY) / this->SCA_LAMBDA) + Bx_island;
+                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * tanh((xyz[2] + 0.5 * perBGrid.DY) / this->SCA_LAMBDA) + Bx_island;
                   cell->at(fsgrids::bfield::PERBY) = 0.0;
                   cell->at(fsgrids::bfield::PERBZ) = 0.0 + Bz_island;
                }
