@@ -44,7 +44,6 @@ namespace projects {
       typedef Readparameters RP;
       RP::add("Reconnection.Scale_size", "Reconnection sheet scale size (m)", 150000.0);
       RP::add("Reconnection.VX0", "Initial Velocity in x-direction", 0.0);
-      RP::add("Reconnection.rho", "Initial density", 1e5);
       RP::add("Reconnection.BX0", "Magnetic field at infinity (T)", 1e-8);
       RP::add("Reconnection.BY0", "Magnetic field at infinity (T)", 0.0);
       RP::add("Reconnection.BZ0", "Magnetic field at infinity (T)", 0.0);
@@ -62,7 +61,6 @@ namespace projects {
       Project::getParameters();
       typedef Readparameters RP;
       RP::get("Reconnection.Scale_size", this->SCA_LAMBDA);
-      RP::get("Reconnection.rho", this->rho);
       RP::get("Reconnection.VX0", this->VX0);
       RP::get("Reconnection.BX0", this->BX0);
       RP::get("Reconnection.BY0", this->BY0);
@@ -78,7 +76,6 @@ namespace projects {
          RP::get(pop + "_Reconnection.rho", sP.DENSITY);
          speciesParams.push_back(sP);
       }
-      this->vA = sqrt(this->BX0*this->BX0) / sqrt(physicalconstants::MASS_PROTON*physicalconstants::MU_0*this->rho);
       
    }
 
@@ -95,16 +92,18 @@ namespace projects {
       creal Lx = Parameters::xmax - Parameters::xmin;
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
+
       
       // creal kz = 8 * M_PI / (Parameters::zmax - Parameters::zmin);
-
+      
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
+      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
       Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
       const Real initV0X = 0;
-      const Real initV0Y = 0.1 * this->vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
-      const Real initV0Z = 0;
+      const Real initV0Y = 0
+      const Real initV0Z = 0.1 * vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
 
       // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
 
@@ -165,12 +164,13 @@ namespace projects {
       creal Lz = Parameters::zmax - Parameters::zmin;
 
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
+      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
       Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
       const Real initV0X = 0;
-      const Real initV0Y = 0.1 * this->vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
-      const Real initV0Z = 0;
+      const Real initV0Y = 0;
+      const Real initV0Z = 0.1 * vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
 
       // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
 
@@ -193,9 +193,12 @@ namespace projects {
       creal Lx = Parameters::xmax - Parameters::xmin;
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
+      const ReconnectionSpeciesParameters& sP = speciesParams[popID];
+      const Real mass = getObjectWrapper().particleSpecies[popID].mass;
+      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
       vector<std::array<Real, 3>> V0;
-      Real vy0 = 0.1 * this->vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
-      std::array<Real, 3> v = {{0.0, vy0, 0.0 }};
+      Real vz0 = 0.1 * vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
+      std::array<Real, 3> v = {{0.0, 0.0, vz0 }};
       V0.push_back(v);
       return V0;
    }
@@ -211,7 +214,6 @@ namespace projects {
       creal Lx = Parameters::xmax - Parameters::xmin;
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
-      Real By_pert;
 
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
@@ -227,10 +229,9 @@ namespace projects {
 
                   // Bx_island = -2.0 * M_PI * this->BZ0 * 0.1 * Lx / Lz * cos(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
                   // Bz_island = M_PI * this->BZ0 * 0.1 * sin(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
-                  By_pert = 0.1 * this->BX0 * cos(5.0 * 2.0 * M_PI * xcoord / Lx) * (1.0 / pow(cosh((zcoord - Lz/4) / (this->SCA_LAMBDA)), 2.0) - 1.0 / pow(cosh((zcoord + Lz/4) / (this->SCA_LAMBDA)), 2.0));
 
                   cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((zcoord - Lz/4) / this->SCA_LAMBDA) - tanh((zcoord + Lz/4) / this->SCA_LAMBDA) + 1);
-                  cell->at(fsgrids::bfield::PERBY) = By_pert;
+                  cell->at(fsgrids::bfield::PERBY) = 0.0;
                   cell->at(fsgrids::bfield::PERBZ) = 0.0;
                }
             }
