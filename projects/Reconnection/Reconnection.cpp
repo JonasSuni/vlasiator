@@ -102,7 +102,7 @@ namespace projects {
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
       const Real initV0X = 0;
-      const Real initV0Y = 0
+      const Real initV0Y = 0;
       const Real initV0Z = 0.1 * vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
 
       // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
