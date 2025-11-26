@@ -190,6 +190,9 @@ namespace projects {
       creal z,
       const uint popID
    ) const {
+      creal Lx = Parameters::xmax - Parameters::xmin;
+      creal Ly = Parameters::ymax - Parameters::ymin;
+      creal Lz = Parameters::zmax - Parameters::zmin;
       vector<std::array<Real, 3>> V0;
       Real vy0 = 0.1 * this->vA * cos(5.0 * 2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0));
       std::array<Real, 3> v = {{0.0, vy0, 0.0 }};
