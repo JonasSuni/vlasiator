@@ -43,17 +43,17 @@ namespace projects {
    void Reconnection::addParameters(){
       typedef Readparameters RP;
       RP::add("Reconnection.Scale_size", "Reconnection sheet scale size (m)", 150000.0);
-      RP::add("Reconnection.VX0", "Initial Velocity in x-direction", 1e4);
-      RP::add("Reconnection.BX0", "Magnetic field at infinity (T)", 8.33061003094e-8);
-      RP::add("Reconnection.BY0", "Magnetic field at infinity (T)", 8.33061003094e-8);
-      RP::add("Reconnection.BZ0", "Magnetic field at infinity (T)", 8.33061003094e-8);
+      RP::add("Reconnection.VX0", "Initial Velocity in x-direction", 0.0);
+      RP::add("Reconnection.BX0", "Magnetic field at infinity (T)", 1e-8);
+      RP::add("Reconnection.BY0", "Magnetic field at infinity (T)", 0.0);
+      RP::add("Reconnection.BZ0", "Magnetic field at infinity (T)", 0.0);
 
       // Per-population parameters
       for(uint i=0; i< getObjectWrapper().particleSpecies.size(); i++) {
          const std::string& pop = getObjectWrapper().particleSpecies[i].name;
 
          RP::add(pop + "_Reconnection.Temperature", "Temperature (K)", 2.0e6);
-         RP::add(pop + "_Reconnection.rho", "Number density at infinity (m^-3)", 1.0e7);
+         RP::add(pop + "_Reconnection.rho", "Number density at infinity (m^-3)", 1.0e5);
       }
    }
 
@@ -88,20 +88,24 @@ namespace projects {
       const Real x  = cell->parameters[CellParams::XCRD] + 0.5*cell->parameters[CellParams::DX];
       const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
       const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
+
+      creal Lx = Parameters::xmax - Parameters::xmin;
+      creal Ly = Parameters::ymax - Parameters::ymin;
+      creal Lz = Parameters::zmax - Parameters::zmin;
       
       // creal kz = 8 * M_PI / (Parameters::zmax - Parameters::zmin);
 
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      Real initRho = sP.DENSITY;
+      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
-      const Real initV0X = -1.0 * this->VX0 * tanh(x / this->SCA_LAMBDA);
+      const Real initV0X = 0;
       const Real initV0Y = 0;
       const Real initV0Z = 0;
 
-      creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
+      // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
 
-      initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
+      // initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
 
       #ifdef USE_GPU
       vmesh::VelocityMesh *vmesh = cell->dev_get_velocity_mesh(popID);
@@ -150,20 +154,24 @@ namespace projects {
       const ReconnectionSpeciesParameters& sP = speciesParams[popID];
       // Fetch spatial cell center coordinates
       const Real x  = cell->parameters[CellParams::XCRD] + 0.5*cell->parameters[CellParams::DX];
-      // const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
-      // const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
+      const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
+      const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
+
+      creal Lx = Parameters::xmax - Parameters::xmin;
+      creal Ly = Parameters::ymax - Parameters::ymin;
+      creal Lz = Parameters::zmax - Parameters::zmin;
 
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      Real initRho = sP.DENSITY;
+      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/4) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/4) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
-      const Real initV0X = -1.0 * this->VX0 * tanh(x / this->SCA_LAMBDA);
+      const Real initV0X = 0;
       const Real initV0Y = 0;
       const Real initV0Z = 0;
 
-      creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
+      // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
 
-      initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
+      // initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
       creal vx = vx_in - initV0X;
       creal vy = vy_in - initV0Y;
       creal vz = vz_in - initV0Z;
@@ -192,7 +200,7 @@ namespace projects {
    ) {
       setBackgroundFieldToZero(BgBGrid);
 
-      Real Bx_island, By_island, Bz_island;
+      // Real Bx_island, By_island, Bz_island;
       creal Lx = Parameters::xmax - Parameters::xmin;
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
@@ -206,13 +214,14 @@ namespace projects {
                for (FsGridTools::FsIndex_t z = 0; z < localSize[2]; ++z) {
                   const std::array<Real, 3> xyz = perBGrid.getPhysicalCoords(x, y, z);
                   std::array<Real, fsgrids::bfield::N_BFIELD>* cell = perBGrid.get(x, y, z);
+                  const Real z = xyz[2] + 0.5 * perBGrid.DY;
 
-                  Bx_island = -2.0 * M_PI * this->BZ0 * 0.1 * Lx / Lz * cos(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
-                  Bz_island = M_PI * this->BZ0 * 0.1 * sin(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
+                  // Bx_island = -2.0 * M_PI * this->BZ0 * 0.1 * Lx / Lz * cos(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
+                  // Bz_island = M_PI * this->BZ0 * 0.1 * sin(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
 
-                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * tanh((xyz[1] + 0.5 * perBGrid.DY) / this->SCA_LAMBDA) + Bx_island;
-                  cell->at(fsgrids::bfield::PERBY) = this->BY0 * tanh((xyz[2] + 0.5 * perBGrid.DZ) / this->SCA_LAMBDA);
-                  cell->at(fsgrids::bfield::PERBZ) = this->BZ0 * tanh((xyz[0] + 0.5 * perBGrid.DX) / this->SCA_LAMBDA) + Bz_island;
+                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((z - Lz/4) / this->SCA_LAMBDA) - tanh((z + Lz/4) / this->SCA_LAMBDA) + 1);
+                  cell->at(fsgrids::bfield::PERBY) = 0.0;
+                  cell->at(fsgrids::bfield::PERBZ) = 0.0;
                }
             }
          }
