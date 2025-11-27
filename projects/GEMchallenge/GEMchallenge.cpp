@@ -74,7 +74,7 @@ namespace projects {
 
          RP::get(pop + "_GEMchallenge.Temperature", sP.TEMPERATURE);
          RP::get(pop + "_GEMchallenge.rho", sP.DENSITY);
-
+         this->rho0 = sP.DENSITY;
          speciesParams.push_back(sP);
       }
    }
@@ -197,6 +197,8 @@ namespace projects {
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
 
+      creal di = 299792458/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0)
+
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
 
@@ -207,8 +209,8 @@ namespace projects {
                   const std::array<Real, 3> xyz = perBGrid.getPhysicalCoords(x, y, z);
                   std::array<Real, fsgrids::bfield::N_BFIELD>* cell = perBGrid.get(x, y, z);
 
-                  Bx_island = -M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) * Lx / Lz;
-                  Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
+                  Bx_island = -M_PI * di * this->BX0 * 0.1 * cos(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lz;
+                  Bz_island = 2.0 * di * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lx;
 
                   cell->at(fsgrids::bfield::PERBX) = this->BX0 * tanh((xyz[2] + 0.5 * perBGrid.DY) / this->SCA_LAMBDA) + Bx_island;
                   cell->at(fsgrids::bfield::PERBY) = 0.0;
