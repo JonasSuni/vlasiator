@@ -214,8 +214,8 @@ namespace projects {
                   const Real zcoord = xyz[2] + 0.5 * perBGrid.DZ;
                   const Real xcoord = xyz[0] + 0.5 * perBGrid.DX;
 
-                  Bx_island = -6.0 * di * M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * xcoord / Lx) * (sin(6.0 * M_PI * (zcoord - Lz/6) / Lz) - sin(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lz;
-                  Bz_island = 2.0 * di * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * xcoord / Lx) * (cos(6.0 * M_PI * (zcoord - Lz/6) / Lz) - cos(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lx;
+                  Bx_island = -6.0 * M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * xcoord / Lx) * (sin(6.0 * M_PI * (zcoord - Lz/6) / Lz) - sin(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lz;
+                  Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * xcoord / Lx) * (cos(6.0 * M_PI * (zcoord - Lz/6) / Lz) - cos(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lx;
 
                   cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((zcoord - Lz/6) / this->SCA_LAMBDA) - tanh((zcoord + Lz/6) / this->SCA_LAMBDA) + 1) + Bx_island;
                   cell->at(fsgrids::bfield::PERBY) = 0.0;
