@@ -197,7 +197,7 @@ namespace projects {
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
 
-      creal di = 299792458/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0)
+      creal di = 299792458/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0);
 
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
