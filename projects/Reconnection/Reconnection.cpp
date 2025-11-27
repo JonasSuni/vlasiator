@@ -97,17 +97,12 @@ namespace projects {
       // creal kz = 8 * M_PI / (Parameters::zmax - Parameters::zmin);
       
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
-      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 0.2);
+      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/6) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/6) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
       const Real initV0X = 0;
       const Real initV0Y = 0;
-      const Real initV0Z = 0.1 * vA * cos(2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0));
-
-      // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
-
-      // initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
+      const Real initV0Z = 0;
 
       #ifdef USE_GPU
       vmesh::VelocityMesh *vmesh = cell->dev_get_velocity_mesh(popID);
@@ -164,17 +159,13 @@ namespace projects {
       creal Lz = Parameters::zmax - Parameters::zmin;
 
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
-      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 0.2);
+      Real initRho = sP.DENSITY * (1.0 / pow(cosh((z - Lz/6) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + Lz/6) / (this->SCA_LAMBDA)), 2.0) + 0.2);
       Real initT = sP.TEMPERATURE;
       // Note: bulk V is zero, according to this and getV0().
       const Real initV0X = 0;
       const Real initV0Y = 0;
-      const Real initV0Z = 0.1 * vA * cos(2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0));
+      const Real initV0Z = 0;
 
-      // creal rhofac = (this->BX0*this->BX0 + this->BY0*this->BY0 + this->BZ0*this->BZ0) / 2.0 / physicalconstants::MU_0  / physicalconstants::K_B / initT;
-
-      // initRho += rhofac / pow(cosh(x / (this->SCA_LAMBDA)), 2.0);
       creal vx = vx_in - initV0X;
       creal vy = vy_in - initV0Y;
       creal vz = vz_in - initV0Z;
@@ -190,15 +181,8 @@ namespace projects {
       creal z,
       const uint popID
    ) const {
-      creal Lx = Parameters::xmax - Parameters::xmin;
-      creal Ly = Parameters::ymax - Parameters::ymin;
-      creal Lz = Parameters::zmax - Parameters::zmin;
-      const ReconnectionSpeciesParameters& sP = speciesParams[popID];
-      const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      creal vA = sqrt(this->BX0 * this->BX0) / sqrt(sP.DENSITY*mass*physicalconstants::MU_0);
       vector<std::array<Real, 3>> V0;
-      Real vz0 = 0.1 * vA * cos(2.0 * M_PI * x / Lx) * (1.0 / pow(cosh((z - 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0) + 1.0 / pow(cosh((z + 2 * this->SCA_LAMBDA) / (this->SCA_LAMBDA)), 2.0));
-      std::array<Real, 3> v = {{0.0, 0.0, vz0 }};
+      std::array<Real, 3> v = {{0.0, 0.0, 0.0 }};
       V0.push_back(v);
       return V0;
    }
@@ -210,7 +194,7 @@ namespace projects {
    ) {
       setBackgroundFieldToZero(BgBGrid);
 
-      // Real Bx_island, By_island, Bz_island;
+      Real Bx_island, By_island, Bz_island;
       creal Lx = Parameters::xmax - Parameters::xmin;
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
@@ -227,12 +211,12 @@ namespace projects {
                   const Real zcoord = xyz[2] + 0.5 * perBGrid.DZ;
                   const Real xcoord = xyz[0] + 0.5 * perBGrid.DX;
 
-                  // Bx_island = -2.0 * M_PI * this->BZ0 * 0.1 * Lx / Lz * cos(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
-                  // Bz_island = M_PI * this->BZ0 * 0.1 * sin(M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(2.0 * M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz);
+                  Bx_island = -6.0 * M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * xcoord / Lx) * (sin(6.0 * M_PI * (zcoord - Lz/6) / Lz) - sin(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lz;
+                  Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * xcoord / Lx) * (cos(6.0 * M_PI * (zcoord - Lz/6) / Lz) - cos(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lx;
 
-                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((zcoord - 2 * this->SCA_LAMBDA) / this->SCA_LAMBDA) - tanh((zcoord + 2 * this->SCA_LAMBDA) / this->SCA_LAMBDA) + 1);
+                  cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((zcoord - Lz/6) / this->SCA_LAMBDA) - tanh((zcoord + Lz/6) / this->SCA_LAMBDA) + 1) + Bx_island;
                   cell->at(fsgrids::bfield::PERBY) = 0.0;
-                  cell->at(fsgrids::bfield::PERBZ) = 0.0;
+                  cell->at(fsgrids::bfield::PERBZ) = 0.0 + Bz_island;
                }
             }
          }
