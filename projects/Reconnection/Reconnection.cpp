@@ -74,7 +74,6 @@ namespace projects {
 
          RP::get(pop + "_Reconnection.Temperature", sP.TEMPERATURE);
          RP::get(pop + "_Reconnection.rho", sP.DENSITY);
-         this->rho0 = sP.DENSITY;
          speciesParams.push_back(sP);
       }
       
@@ -200,8 +199,6 @@ namespace projects {
       creal Ly = Parameters::ymax - Parameters::ymin;
       creal Lz = Parameters::zmax - Parameters::zmin;
 
-      creal di = 299792458/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0);
-
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
 
@@ -214,8 +211,8 @@ namespace projects {
                   const Real zcoord = xyz[2] + 0.5 * perBGrid.DZ;
                   const Real xcoord = xyz[0] + 0.5 * perBGrid.DX;
 
-                  Bx_island = -6.0 * M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * xcoord / Lx) * (sin(6.0 * M_PI * (zcoord - Lz/6) / Lz) - sin(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lz;
-                  Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * xcoord / Lx) * (cos(6.0 * M_PI * (zcoord - Lz/6) / Lz) - cos(6.0 * M_PI * (zcoord + Lz/6) / Lz)) / Lx;
+                  Bx_island = -6.0 * M_PI * this->BX0 * 0.1 * cos(2.0 * M_PI * xcoord / Lx) * (sin(6.0 * M_PI * (zcoord - Lz/6) / Lz) - sin(6.0 * M_PI * (zcoord + Lz/6) / Lz)) * Lx / Lz;
+                  Bz_island = 2.0 * M_PI * this->BX0 * 0.1 * sin(2.0 * M_PI * xcoord / Lx) * (cos(6.0 * M_PI * (zcoord - Lz/6) / Lz) - cos(6.0 * M_PI * (zcoord + Lz/6) / Lz));
 
                   cell->at(fsgrids::bfield::PERBX) = this->BX0 * (tanh((zcoord - Lz/6) / this->SCA_LAMBDA) - tanh((zcoord + Lz/6) / this->SCA_LAMBDA) + 1) + Bx_island;
                   cell->at(fsgrids::bfield::PERBY) = 0.0;
