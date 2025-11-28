@@ -192,6 +192,11 @@ namespace projects {
    ) {
       setBackgroundFieldToZero(BgBGrid);
 
+      creal Lx = Parameters::xmax - Parameters::xmin;
+      creal Ly = Parameters::ymax - Parameters::ymin;
+      creal Lz = Parameters::zmax - Parameters::zmin;
+
+      creal di = 299792458.0/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0);
       
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
@@ -203,11 +208,6 @@ namespace projects {
                   const std::array<Real, 3> xyz = perBGrid.getPhysicalCoords(x, y, z);
                   std::array<Real, fsgrids::bfield::N_BFIELD>* cell = perBGrid.get(x, y, z);
                   Real Bx_island, By_island, Bz_island;
-                  creal Lx = Parameters::xmax - Parameters::xmin;
-                  creal Ly = Parameters::ymax - Parameters::ymin;
-                  creal Lz = Parameters::zmax - Parameters::zmin;
-            
-                  creal di = 299792458.0/sqrt(this->rho0*physicalconstants::CHARGE*physicalconstants::CHARGE/physicalconstants::MASS_PROTON/physicalconstants::EPS_0);
 
                   Bx_island = -M_PI * di * this->BX0 * 0.1 * cos(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * sin(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lz;
                   Bz_island = 2.0 * M_PI * di * this->BX0 * 0.1 * sin(2.0 * M_PI * (xyz[0] + 0.5 * perBGrid.DX) / Lx) * cos(M_PI * (xyz[2] + 0.5 * perBGrid.DZ) / Lz) / Lx;
