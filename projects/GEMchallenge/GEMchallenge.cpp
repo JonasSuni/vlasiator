@@ -202,7 +202,7 @@ namespace projects {
       if(!P::isRestart) {
          auto localSize = perBGrid.getLocalSize().data();
 
-         // #pragma omp parallel for collapse(3)
+         #pragma omp parallel for collapse(3)
          for (FsGridTools::FsIndex_t x = 0; x < localSize[0]; ++x) {
             for (FsGridTools::FsIndex_t y = 0; y < localSize[1]; ++y) {
                for (FsGridTools::FsIndex_t z = 0; z < localSize[2]; ++z) {
