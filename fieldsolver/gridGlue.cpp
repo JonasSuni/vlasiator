@@ -133,7 +133,7 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
 
 void copyMomentsToOutflow(FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
                            FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid) {
-                              
+
    // Get size of local domain and create swapGrid for filtering
    const FsGridTools::FsIndex_t* mntDims = &momentsGrid.getLocalSize()[0];
 
@@ -157,9 +157,9 @@ void copyMomentsToOutflow(FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>,
 
 Real copyMomentFromClosestSimCell(FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
                            FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
-                           cuint i,
-                           cuint j,
-                           cuint k,
+                           cint i,
+                           cint j,
+                           cint k,
                            cuint moment) {
    int distance = numeric_limits<int>::max();
    vector< array<int,3> > closestCells;

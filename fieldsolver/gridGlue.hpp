@@ -52,6 +52,13 @@ enum FieldsToCommunicate {
 std::vector<CellID> mapDccrgIdToFsGridGlobalID(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
 					       CellID dccrgID);
 
+Real copyMomentFromClosestSimCell(FsGrid< std::array<Real, fsgrids::moments::N_MOMENTS>, FS_STENCIL_WIDTH> & momentsGrid,
+                           FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
+                           cint i,
+                           cint j,
+                           cint k,
+                           cuint moment);
+
 /*! Take input moments from DCCRG grid and put them into the Fieldsolver grid
  * \param mpiGrid The DCCRG grid carrying rho, rhoV and P
  * \param cells List of local cells
