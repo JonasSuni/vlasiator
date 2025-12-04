@@ -1223,6 +1223,20 @@ int simulate(int argn,char* args[]) {
       if (P::propagateVlasovTranslation || P::propagateVlasovAcceleration) {
          phiprof::Timer timer {"Update system boundaries (Vlasov pre-translation)"};
          sysBoundaryContainer.updateState(mpiGrid, technicalGrid, perBGrid, BgBGrid, P::t + 0.5 * P::dt);
+         calculateInterpolatedVelocityMoments(
+            mpiGrid,
+            CellParams::RHOM,
+            CellParams::VX,
+            CellParams::VY,
+            CellParams::VZ,
+            CellParams::RHOQ,
+            CellParams::P_11,
+            CellParams::P_22,
+            CellParams::P_33,
+            CellParams::P_23,
+            CellParams::P_13,
+            CellParams::P_12
+         );
          timer.stop();
          addTimedBarrier("barrier-boundary-conditions");
       }
