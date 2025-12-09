@@ -5,7 +5,6 @@
 #include "../definitions.h"
 #include "../common.h"
 #include "gridGlue.hpp"
-#include "../sysboundary/sysboundary.h"
 
 
 // Datastructure for coupling
@@ -205,10 +204,8 @@ void filterMoments(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
       momentsGrid.updateGhostCells();
 
       // If outflow boundaries exist, filtered moments must be recopied there
-      if (SysBoundary::checkSysBoundaryExistence(sysboundarytype::OUTFLOW)) {
-         copyMomentsToOutflow(momentsGrid, technicalGrid);
-         momentsGrid.updateGhostCells();
-      }
+      copyMomentsToOutflow(momentsGrid, technicalGrid);
+      momentsGrid.updateGhostCells();
    }
 }
 

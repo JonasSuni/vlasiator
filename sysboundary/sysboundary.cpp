@@ -812,6 +812,6 @@ void SysBoundary::updateSysBoundariesAfterLoadBalance(dccrg::Dccrg<SpatialCell, 
    }
 }
 
-static bool SysBoundary::checkSysBoundaryExistence(cuint sbctype) {
-   return sysBoundaryExistence[sbctype];
+bool SysBoundary::checkSysBoundaryExistence(cuint sysBoundaryType) {
+   return sysBoundaryExistence[sysBoundaryType];
 }
