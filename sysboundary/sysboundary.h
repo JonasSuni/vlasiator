@@ -94,6 +94,11 @@ class SysBoundary {
    void clear() { // Clears all conts of SBC (destructing template cells for GPU branch)
       sysBoundaries.clear();
    }
+
+   void setSysBoundaryExistence(cuint sysBoundaryType);
+
+   bool checkSysBoundaryExistence(cuint sysBoundaryType);
+   
    private:
       /*! Private copy-constructor to prevent copying the class. */
       SysBoundary(const SysBoundary& bc);
@@ -109,14 +114,15 @@ class SysBoundary {
       /*! bool telling whether any system boundary condition is dynamic in time (and thus needs updating). */
       bool anyDynamic;
 
+      /*! Array of bool telling which types of sysboundary have been initialised*/
+      std::array<bool,sysboundarytype::N_SYSBOUNDARY_CONDITIONS> sysBoundaryExistence;
+
       /*! Array of bool telling whether the system is periodic in any direction. */
       bool periodic[3];
 };
 
 bool precedenceSort(const SBC::SysBoundaryCondition* first,
                     const SBC::SysBoundaryCondition* second);
-
-
 
 /*
    Input a vector of cellIDs (cellList) and compute a new vector with only those cells which are on a sysboundary and are to be computed

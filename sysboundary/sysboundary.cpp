@@ -54,7 +54,9 @@ bool precedenceSort(const SBC::SysBoundaryCondition* first, const SBC::SysBounda
 // ***** DEFINITIONS FOR BOUNDARY CLASS *****
 // ************************************************************
 
-SysBoundary::SysBoundary() : anyDynamic(false) {}
+SysBoundary::SysBoundary() {
+   sysBoundaryExistence.fill(false);
+}
 
 /*!\brief Destructor for class SysBoundary.
  *
@@ -806,4 +808,12 @@ void SysBoundary::updateSysBoundariesAfterLoadBalance(dccrg::Dccrg<SpatialCell, 
    for (list<SBC::SysBoundaryCondition*>::iterator it = sysBoundaries.begin(); it != sysBoundaries.end(); ++it) {
       (*it)->updateSysBoundaryConditionsAfterLoadBalance(mpiGrid, local_cells_on_boundary);
    }
+}
+
+void SysBoundary::setSysBoundaryExistence(cuint sysboundarytype) {
+   this->sysBoundaryExistence[sysboundarytype] = true;
+}
+
+bool SysBoundary::checkSysBoundaryExistence(cuint sysboundarytype) {
+   return this->sysBoundaryExistence[sysboundarytype];
 }

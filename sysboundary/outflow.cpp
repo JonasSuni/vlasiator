@@ -45,7 +45,9 @@
 using namespace std;
 
 namespace SBC {
-   Outflow::Outflow(): OuterBoundaryCondition() { }
+   Outflow::Outflow(): OuterBoundaryCondition() { 
+      SysBoundary::setSysBoundaryExistence(sysboundarytype::OUTFLOW);
+   }
    Outflow::~Outflow() { }
 
    void Outflow::addParameters() {
