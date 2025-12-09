@@ -55,7 +55,7 @@ bool precedenceSort(const SBC::SysBoundaryCondition* first, const SBC::SysBounda
 // ************************************************************
 
 SysBoundary::SysBoundary() {
-   sysBoundaryExistence.fill(false);
+   this->sysBoundaryExistence.fill(false);
 }
 
 /*!\brief Destructor for class SysBoundary.
