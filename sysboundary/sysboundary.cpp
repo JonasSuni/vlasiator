@@ -138,6 +138,8 @@ void SysBoundary::addSysBoundary(SBC::SysBoundaryCondition* bc, Project& project
 
    // This assumes that only one instance of each type is created.
    indexToSysBoundary[bc->getIndex()] = bc;
+
+   this->sysBoundaryExistence[bc->getIndex()] = true;
 }
 
 /*!\brief Initialise all system boundary conditions actually used.
@@ -808,10 +810,6 @@ void SysBoundary::updateSysBoundariesAfterLoadBalance(dccrg::Dccrg<SpatialCell, 
    for (list<SBC::SysBoundaryCondition*>::iterator it = sysBoundaries.begin(); it != sysBoundaries.end(); ++it) {
       (*it)->updateSysBoundaryConditionsAfterLoadBalance(mpiGrid, local_cells_on_boundary);
    }
-}
-
-void SysBoundary::setSysBoundaryExistence(cuint sysboundarytype) {
-   this->sysBoundaryExistence[sysboundarytype] = true;
 }
 
 bool SysBoundary::checkSysBoundaryExistence(cuint sysboundarytype) {

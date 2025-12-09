@@ -95,8 +95,6 @@ class SysBoundary {
       sysBoundaries.clear();
    }
 
-   void setSysBoundaryExistence(cuint sysBoundaryType);
-
    bool checkSysBoundaryExistence(cuint sysBoundaryType);
    
    private:
