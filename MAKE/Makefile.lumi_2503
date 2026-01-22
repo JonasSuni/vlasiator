@@ -20,7 +20,7 @@ else
 endif
 
 #======== Library directory ===========
-LIBRARY_PREFIX = $(CURDIR)/libraries-lumi_2403
+LIBRARY_PREFIX = $(CURDIR)/libraries-lumi_2503
 
 CMP = CC
 LNK = CC
