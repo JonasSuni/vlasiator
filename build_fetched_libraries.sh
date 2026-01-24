@@ -24,7 +24,7 @@ cd library-build
 # Some platforms allow for nice parallel builds.
 if [[ $PLATFORM == "-pioneer" ]]; then
    PARALLEL=64
-elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" ]]; then
+elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" || $PLATFORM == "-lumi_2503" ]]; then
    PARALLEL=128
 else
    # Otherwise we are friendly to other users and limit our parallelism
@@ -44,7 +44,7 @@ elif [[ $PLATFORM == "-appleM1" ]]; then
    make -j $PARALLEL CCC=mpic++ CC=appleLLVM CCFLAGS="-fpic -O2 -std=c++17 -DCLOCK_ID=CLOCK_MONOTONIC -fopenmp" LDFLAGS="-fopenmp"
 elif [[ $PLATFORM == "-leonardo_dcgp_intel" ]]; then
    make -j $PARALLEL CCC="mpiicpc -cxx=icpx" CC="mpiicc -cc=icx" CCFLAGS="-fpic -O2 -std=c++17 -DCLOCK_ID=CLOCK_MONOTONIC -qopenmp" LDFLAGS="-qopenmp"
-elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" ]]; then
+elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" || $PLATFORM == "-lumi_2503" ]]; then
    make -j $PARALLEL CCC=CC CC=cc CCFLAGS="-fpic -O2 -std=c++17 -DCLOCK_ID=CLOCK_MONOTONIC -fopenmp" LDFLAGS="-fopenmp"
 elif [[ $PLATFORM == "-lumi_hipcc" ]]; then
     make -j $PARALLEL CC=hipcc
@@ -66,7 +66,7 @@ cd vlsv
 make clean ARCH=arch
 if [[ $PLATFORM == "-leonardo_dcgp_intel" ]]; then
    make ARCH=arch CMP="mpiicpc -cxx=icpx"
-elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_hipcc" || $PLATFORM == "-lumi_2403" ]]; then
+elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_hipcc" || $PLATFORM == "-lumi_2403" || $PLATFORM == "-lumi_2503" ]]; then
    make ARCH=arch CMP=CC
 else
    make ARCH=arch
@@ -103,7 +103,7 @@ if [[ $PLATFORM != "-leonardo_booster" && $PLATFORM != "-karolina_cuda" && $PLAT
         ./configure --prefix=$WORKSPACE/libraries${PLATFORM} --with-jemalloc-prefix=je_
     elif [[ $PLATFORM == "-leonardo_dcgp_intel" ]]; then
         ./configure --prefix=$WORKSPACE/libraries${PLATFORM} --with-jemalloc-prefix=je_ CC="mpiicc -cc=icx" CXX="mpiicpc -cxx=icpx"
-    elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-lumi_2403" ]]; then
+    elif [[ $PLATFORM == "-hile_cpu" || $PLATFORM == "-lumi_2403" || $PLATFORM == "-lumi_2503" ]]; then
         ./configure --prefix=$WORKSPACE/libraries${PLATFORM} --with-jemalloc-prefix=je_ CC="cc" CXX="CC"
     else
         ./configure --prefix=$WORKSPACE/libraries${PLATFORM} --with-jemalloc-prefix=je_ CC=mpicc CXX=mpic++
@@ -134,7 +134,7 @@ elif [[ $PLATFORM == "-leonardo_dcgp_intel" ]]; then
     sed -i 's/mpiicpc/mpiicpc -cxx=icpx/g' Makefile
     sed -i 's/mpiicpc/mpiicpc -cxx=icpx/g' src/Makefile
     sed -i 's/mpiicpc/mpiicpc -cxx=icpx/g' src/driver/Makefile
-elif [[ $PLATFORM == "-hile_cpu" ||  $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" ]]; then
+elif [[ $PLATFORM == "-hile_cpu" ||  $PLATFORM == "-hile_gpu" || $PLATFORM == "-lumi_2403" || $PLATFORM == "-lumi_2503" ]]; then
    ../Zoltan/configure --prefix=$WORKSPACE/libraries${PLATFORM} --enable-mpi --with-mpi-compilers --with-gnumake --with-id-type=ullong CC=cc CXX=CC
 else
     ../Zoltan/configure --prefix=$WORKSPACE/libraries${PLATFORM} --enable-mpi --with-mpi-compilers --with-gnumake --with-id-type=ullong CC=mpicc CXX=mpic++
