@@ -1,6 +1,6 @@
 # Suggested modules (after clean shell, no module purging)
 
-# module load LUMI/25.03 ; module load partition/C; module load papi/7.1.0.1
+# module load LUMI/25.03 ; module load partition/C; ; module load Boost; module load papi/7.1.0.1
 
 # Build libraries with ./fetch_and_build_libraries.sh lumi_2503
 
