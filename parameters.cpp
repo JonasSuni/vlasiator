@@ -142,6 +142,7 @@ int P::writeRestartAsFloat = false;
 string P::loadBalanceAlgorithm = string("");
 std::map<std::string, std::string> P::loadBalanceOptions;
 uint P::rebalanceInterval = numeric_limits<uint>::max();
+uint P::loadBalanceTransferPassesMultiplier = 1;
 
 vector<string> P::outputVariableList;
 vector<string> P::diagnosticVariableList;
@@ -413,6 +414,8 @@ bool P::addParameters() {
 
    RP::addComposing("loadBalance.optionKey", "Zoltan option key. Has to be matched by loadBalance.optionValue.");
    RP::addComposing("loadBalance.optionValue", "Zoltan option value. Has to be matched by loadBalance.optionKey.");
+
+   RP::add("loadBalance.transferPassesMultiplier", "Multiplier for the number of transfers to do during load balance", 1);
 
    // Output variable parameters
    RP::add("io.system_write_all_data_reducers", "If 0 don't write all DROs, if 1 do write them.", false);
@@ -1081,6 +1084,8 @@ void Parameters::getParameters() {
          loadBalanceOptions[loadBalanceKeys[i]] = loadBalanceValues[i];
       }
    }
+
+   RP::get("loadBalance.transferPassesMultiplier", P::loadBalanceTransferPassesMultiplier);
 
    // Get output variable parameters
    RP::get("variables.output", P::outputVariableList);

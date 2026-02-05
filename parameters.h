@@ -163,6 +163,7 @@ struct Parameters {
    static uint rebalanceInterval;           /*!< Load rebalance interval (steps). */
    static bool prepareForRebalance; /**< If true, propagators should measure their time consumption in preparation
                                      * for mesh repartitioning.*/
+   static uint loadBalanceTransferPassesMultiplier; /*!< Multiplier for the number of transfer passes in LB*/
 
    static std::vector<std::string>
        outputVariableList; /*!< List of data reduction operators (DROs) to add to the grid file output.*/
