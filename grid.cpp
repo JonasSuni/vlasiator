@@ -518,7 +518,7 @@ void balanceLoad(dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid, S
 
    // Idea: do as many cell sending passes hereafter so that there's not more than transfer_block_fraction_limit
    // blocks of this task's total block count that gets sent. Helps in reducing memory peaks during load balancing.
-   creal transfer_block_fraction_limit = 0.1;
+   creal transfer_block_fraction_limit = P::loadBalanceTransferThreshold;
    uint64_t num_part_transfers_local = 1, num_part_transfers, outgoing_block_count = 0, total_block_count = 0;
    bool count_determined = false;
    Real outgoing_block_fraction;
