@@ -30,58 +30,58 @@
  * with the Boris-Method */
 void Particle::push(Vec3d& B, Vec3d& E, double dt) {
 
-   Vec3d uminus = v + (q * E * dt)/(2. * m);
-   Vec3d h = (q * B * dt)/(2. * m * gamma(uminus));
-   Vec3d uprime = uminus + cross_product(uminus, h);
-   h = (2.* h)/(1. + dot_product(h,h));
-   Vec3d uplus = uminus + cross_product(uprime, h);
+	Vec3d uminus = v + (q * E * dt)/(2. * m);
+	Vec3d h = (q * B * dt)/(2. * m * gamma(uminus));
+	Vec3d uprime = uminus + cross_product(uminus, h);
+	h = (2.* h)/(1. + dot_product(h,h));
+	Vec3d uplus = uminus + cross_product(uprime, h);
 
-   v = uplus + (q * E * dt)/(2. * m);
-   x += dt * v;
+	v = uplus + (q * E * dt)/(2. * m);
+	x += dt * v;
 }
 
 void writeParticles(ParticleContainer& p,const char* filename) {
 
-   vlsv::Writer vlsvWriter;
-   vlsvWriter.open(filename,MPI_COMM_WORLD,0);
+	vlsv::Writer vlsvWriter;
+	vlsvWriter.open(filename,MPI_COMM_WORLD,0);
 
-   std::vector<double> writebuf(p.size() * 3);
+	std::vector<double> writebuf(p.size() * 3);
 
-   /* First, store particle positions */
-   uint writable_particles=0;
-   for(unsigned int i=0; i < p.size(); i++) {
-      if(vector_length(p[i].x) == 0) {
-        continue;
-      }
+	/* First, store particle positions */
+	uint writable_particles=0;
+	for(unsigned int i=0; i < p.size(); i++) {
+		if(vector_length(p[i].x) == 0) {
+			continue;
+		}
 
-      for(int j=0; j<3; j++) {
-         writebuf[3*writable_particles+j] = p[i].x[j];
-      }
-      writable_particles++;
-   }
+		for(int j=0; j<3; j++) {
+			writebuf[3*writable_particles+j] = p[i].x[j];
+		}
+		writable_particles++;
+	}
 
-   std::map<std::string,std::string> attribs;
-   attribs["name"] = "proton_position";
-   attribs["type"] = vlsv::mesh::STRING_POINT;
-   if (vlsvWriter.writeArray("MESH",attribs,writable_particles,3,writebuf.data()) == false) {
-      std::cerr << "\t ERROR failed to write particle positions!" << std::endl;
-   }
+	std::map<std::string,std::string> attribs;
+	attribs["name"] = "proton_position";
+	attribs["type"] = vlsv::mesh::STRING_POINT;
+	if (vlsvWriter.writeArray("MESH",attribs,writable_particles,3,writebuf.data()) == false) {
+		std::cerr << "\t ERROR failed to write particle positions!" << std::endl;
+	}
 
-   /* Then, velocities */
-   writable_particles=0;
-   for(unsigned int i=0; i < p.size(); i++) {
-      if(vector_length(p[i].x) == 0) {
-        continue;
-      }
-      for(int j=0; j<3; j++) {
-         writebuf[3*writable_particles+j] = p[i].v[j];
-      }
-      writable_particles++;
-   }
+	/* Then, velocities */
+	writable_particles=0;
+	for(unsigned int i=0; i < p.size(); i++) {
+		if(vector_length(p[i].x) == 0) {
+			continue;
+		}
+		for(int j=0; j<3; j++) {
+			writebuf[3*writable_particles+j] = p[i].v[j];
+		}
+		writable_particles++;
+	}
 
-   attribs["name"] = "proton_velocity";
-   if (vlsvWriter.writeArray("MESH",attribs,writable_particles,3,writebuf.data()) == false) {
-      std::cerr << "\t ERROR failed to write particle velocities!" << std::endl;
-   }
-   vlsvWriter.close();
+	attribs["name"] = "proton_velocity";
+	if (vlsvWriter.writeArray("MESH",attribs,writable_particles,3,writebuf.data()) == false) {
+		std::cerr << "\t ERROR failed to write particle velocities!" << std::endl;
+	}
+	vlsvWriter.close();
 }

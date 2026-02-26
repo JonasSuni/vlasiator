@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 /*
-Background magnetic field class of Vlasiator.
-*/
+   Background magnetic field class of Vlasiator.
+ */
 
 #include <stdlib.h>
 #include <math.h>
@@ -30,22 +30,22 @@ Background magnetic field class of Vlasiator.
 
 
 void ConstantField::initialize(const double Bx,const double By, const double Bz){
-   _B[0]=Bx;
-   _B[1]=By;
-   _B[2]=Bz;
-   _initialized=true;
+	_B[0]=Bx;
+	_B[1]=By;
+	_B[2]=Bz;
+	_initialized=true;
 }
 
 
 
 double ConstantField::operator()( double x, double y, double z, coordinate component, unsigned int derivative, coordinate dcomponent) const {
-   if(derivative == 0) {
-      //Value of B
-      return _B[component];
-   } else {
-      //all derivatives are zero
-      return 0.0;
-   }
+	if(derivative == 0) {
+		//Value of B
+		return _B[component];
+	} else {
+		//all derivatives are zero
+		return 0.0;
+	}
 }
 
 

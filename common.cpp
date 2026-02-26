@@ -34,28 +34,28 @@
  * \param line code line where bailout was called (use __LINE__ in the call)
  */
 void bailout(
-   const bool condition,
-   const std::string& message,
-   const char * const file,
-   const int line
-) {
+	const bool condition,
+	const std::string& message,
+	const char * const file,
+	const int line
+	) {
    #pragma omp critical
-   {
-      if (condition && (globalflags::bailingOut == 0)) {
-         int myRank;
-         MPI_Comm_rank(MPI_COMM_WORLD,&myRank);
-         std::cerr << "Process " << myRank << " bailing out";
-         if((strcmp(file, "") != 0) && (line != 0)) {
-            std::cerr << " at " << file << ":" << line;
-         }
-         std::cerr << ".";
-         if(strcmp(message.c_str(), "") != 0) {
-            std::cerr << " " << message;
-         }
-         std::cerr << std::endl;
-         globalflags::bailingOut = 1;
-      }
-   }
+	{
+		if (condition && (globalflags::bailingOut == 0)) {
+			int myRank;
+			MPI_Comm_rank(MPI_COMM_WORLD,&myRank);
+			std::cerr << "Process " << myRank << " bailing out";
+			if((strcmp(file, "") != 0) && (line != 0)) {
+				std::cerr << " at " << file << ":" << line;
+			}
+			std::cerr << ".";
+			if(strcmp(message.c_str(), "") != 0) {
+				std::cerr << " " << message;
+			}
+			std::cerr << std::endl;
+			globalflags::bailingOut = 1;
+		}
+	}
 }
 
 /*! \brief A function to stop the simulation if the boolean condition is true.
@@ -66,11 +66,11 @@ void bailout(
  * \param line code line where bailout was called (use __LINE__ in the call)
  */
 void bailout(
-   const bool condition,
-   const char * const file,
-   const int line
-) {
-   bailout(condition, "", file, line);
+	const bool condition,
+	const char * const file,
+	const int line
+	) {
+	bailout(condition, "", file, line);
 }
 
 /*! \brief A function to stop the simulation if the boolean condition is true.
@@ -80,19 +80,19 @@ void bailout(
  * \param message information message printed to cerr
  */
 void bailout(
-   const bool condition,
-   const std::string& message
-) {
-   bailout(condition, message, "", 0);
+	const bool condition,
+	const std::string& message
+	) {
+	bailout(condition, message, "", 0);
 }
 
 /*! Helper function for error handling. err_type default to 0.*/
 [[ noreturn ]] void abort_mpi(const std::string str, const int err_type) {
-   // Single string so output isn't mangled by multiple processes
-   std::cerr << (err_type ? std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " + str : str) + "\n";
-   MPI_Abort(MPI_COMM_WORLD, 1);
+	// Single string so output isn't mangled by multiple processes
+	std::cerr << (err_type ? std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " + str : str) + "\n";
+	MPI_Abort(MPI_COMM_WORLD, 1);
 
-   // Dummy abort to convince compiler function doesn't return
-   // TODO replace with std::unreachable once we switch to C++23
-   abort();
+	// Dummy abort to convince compiler function doesn't return
+	// TODO replace with std::unreachable once we switch to C++23
+	abort();
 }

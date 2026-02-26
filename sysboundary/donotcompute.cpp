@@ -33,61 +33,71 @@
 using namespace std;
 
 namespace SBC {
-   DoNotCompute::DoNotCompute(): SysBoundaryCondition() { }
-   DoNotCompute::~DoNotCompute() { }
-   
-   void DoNotCompute::addParameters() { }
-   void DoNotCompute::getParameters() { }
-   
-   void DoNotCompute::initSysBoundary(
-      creal& t,
-      Project &project
-   ) {
-      precedence = 0;
-      dynamic = false;
-   }
-   
-   void DoNotCompute::assignSysBoundary(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>&,
-                                        FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid) {
-      // Does nothing.
-   }
-   
-   void DoNotCompute::applyInitialState(
-      dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
-      FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
-      FsGrid< array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH> & perBGrid,
-      FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
-      Project&
-   ) {
-     const vector<CellID>& cells = getLocalCells();
+DoNotCompute::DoNotCompute() : SysBoundaryCondition() {
+}
+DoNotCompute::~DoNotCompute() {
+}
+
+void DoNotCompute::addParameters() {
+}
+void DoNotCompute::getParameters() {
+}
+
+void DoNotCompute::initSysBoundary(
+	creal& t,
+	Project &project
+	) {
+	precedence = 0;
+	dynamic = false;
+}
+
+void DoNotCompute::assignSysBoundary(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry>&,
+                                     FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid) {
+	// Does nothing.
+}
+
+void DoNotCompute::applyInitialState(
+	dccrg::Dccrg<SpatialCell,dccrg::Cartesian_Geometry>& mpiGrid,
+	FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
+	FsGrid< array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH> & perBGrid,
+	FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
+	Project&
+	) {
+	const vector<CellID>& cells = getLocalCells();
 #pragma omp parallel for
-      for (size_t i=0; i<cells.size(); ++i) {
-         SpatialCell* cell = mpiGrid[cells[i]];
-         if(cell->sysBoundaryFlag != this->getIndex()) continue;
+	for (size_t i=0; i<cells.size(); ++i) {
+		SpatialCell* cell = mpiGrid[cells[i]];
+		if(cell->sysBoundaryFlag != this->getIndex()) continue;
 
-         //TODO: Set fields on B grid to 0         
-         cell->parameters[CellParams::RHOM] = 0.0;
-         cell->parameters[CellParams::VX] = 0.0;
-         cell->parameters[CellParams::VY] = 0.0;
-         cell->parameters[CellParams::VZ] = 0.0;
-         cell->parameters[CellParams::RHOQ] = 0.0;
-         cell->parameters[CellParams::RHOM_DT2] = 0.0;
-         cell->parameters[CellParams::VX_DT2] = 0.0;
-         cell->parameters[CellParams::VY_DT2] = 0.0;
-         cell->parameters[CellParams::VZ_DT2] = 0.0;
-         cell->parameters[CellParams::RHOQ_DT2] = 0.0;
-      }
-   }
-   
-   void DoNotCompute::updateState(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry> &mpiGrid,
-                                  FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
-                                  FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH> &perBGrid,
-                                  FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
-                                  creal t) {}
+		//TODO: Set fields on B grid to 0
+		cell->parameters[CellParams::RHOM] = 0.0;
+		cell->parameters[CellParams::VX] = 0.0;
+		cell->parameters[CellParams::VY] = 0.0;
+		cell->parameters[CellParams::VZ] = 0.0;
+		cell->parameters[CellParams::RHOQ] = 0.0;
+		cell->parameters[CellParams::RHOM_DT2] = 0.0;
+		cell->parameters[CellParams::VX_DT2] = 0.0;
+		cell->parameters[CellParams::VY_DT2] = 0.0;
+		cell->parameters[CellParams::VZ_DT2] = 0.0;
+		cell->parameters[CellParams::RHOQ_DT2] = 0.0;
+	}
+}
 
-   void DoNotCompute::getFaces(bool *faces) {}
+void DoNotCompute::updateState(dccrg::Dccrg<SpatialCell, dccrg::Cartesian_Geometry> &mpiGrid,
+                               FsGrid< fsgrids::technical, FS_STENCIL_WIDTH> & technicalGrid,
+                               FsGrid<std::array<Real, fsgrids::bfield::N_BFIELD>, FS_STENCIL_WIDTH> &perBGrid,
+                               FsGrid<std::array<Real, fsgrids::bgbfield::N_BGB>, FS_STENCIL_WIDTH>& BgBGrid,
+                               creal t) {
+}
 
-   string DoNotCompute::getName() const {return "DoNotCompute";}
-   
-   uint DoNotCompute::getIndex() const {return sysboundarytype::DO_NOT_COMPUTE;}
+void DoNotCompute::getFaces(bool *faces) {
+}
+
+string DoNotCompute::getName() const {
+	return "DoNotCompute";
+}
+
+uint DoNotCompute::getIndex() const {
+	return sysboundarytype::DO_NOT_COMPUTE;
+}
 }

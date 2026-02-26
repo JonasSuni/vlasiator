@@ -30,8 +30,8 @@
 #include "common.h"
 #include "parameters.h"
 #ifdef PAPI_MEM
-#include "papi.h" 
-#endif 
+#include "papi.h"
+#endif
 
 extern Logger logFile, diagnostic;
 using namespace std;
@@ -46,45 +46,45 @@ using namespace std;
 // Global new using jemalloc
 void *operator new(size_t size)
 {
-   void *p;
-   p =  je_malloc(size);
-   if(!p) {
-      bad_alloc ba;
-      throw ba;
-   }
-   return p;
+	void *p;
+	p =  je_malloc(size);
+	if(!p) {
+		bad_alloc ba;
+		throw ba;
+	}
+	return p;
 }
 
 // Global new[] using jemalloc
 void *operator new[](size_t size)
 {
-   void *p;
-   p =  je_malloc(size);
-   if(!p) {
-      bad_alloc ba;
-      throw ba;
-   }
-   return p;
+	void *p;
+	p =  je_malloc(size);
+	if(!p) {
+		bad_alloc ba;
+		throw ba;
+	}
+	return p;
 }
 
 // Global delete using jemalloc
 void operator delete(void *p)
 {
-   je_free(p);
+	je_free(p);
 }
 
 // Global delete[] using jemalloc
 void operator delete[](void *p)
 {
-   je_free(p);
+	je_free(p);
 }
 
 #if __cpp_sized_deallocation >= 201309
 void operator delete(void *ptr, std::size_t size) noexcept {
-   je_sdallocx(ptr, size, /*flags=*/0);
+	je_sdallocx(ptr, size, /*flags=*/ 0);
 }
 void operator delete[](void *ptr, std::size_t size) noexcept {
-   je_sdallocx(ptr, size, /*flags=*/0);
+	je_sdallocx(ptr, size, /*flags=*/ 0);
 }
 #endif  // __cpp_sized_deallocation
 #endif // JEMALLOC_VERSION_MAJOR < 5
@@ -93,40 +93,40 @@ void operator delete[](void *ptr, std::size_t size) noexcept {
 /*! Purge allocations from all arenas to actually release memory back to system */
 void memory_purge() {
 #ifdef USE_JEMALLOC
-   je_mallctl("arena." STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", NULL, NULL, NULL, 0);
+	je_mallctl("arena." STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", NULL, NULL, NULL, 0);
 #endif
 }
 
 /*! Initialize memory allocator configuration.*/
 void memory_configurator() {
 #ifdef USE_JEMALLOC
-   bool logResult = false;
-   bool foo {false};
-   size_t bar {1};
-   if (logResult) {
-      // Read initial value
-      je_mallctl("background_thread", &foo, &bar, NULL, 0);
-      logFile << "(MEM) mallctl: background_thread value was ";
-      if (foo) {
-         logFile << "true";
-      } else {
-         logFile << "false";
-      }
-   }
-   // Set background threads to true
-   foo = true;
-   bar = 1;
-   je_mallctl("background_thread", NULL, NULL, &foo, bar);
-   if (logResult) {
-      // Read updated value
-      je_mallctl("background_thread", &foo, &bar, NULL, 0);
-      logFile << ", now set to ";
-      if (foo) {
-         logFile << "true";
-      } else {
-         logFile << "false";
-      }
-      logFile << "." << endl;
-   }
+	bool logResult = false;
+	bool foo {false};
+	size_t bar {1};
+	if (logResult) {
+		// Read initial value
+		je_mallctl("background_thread", &foo, &bar, NULL, 0);
+		logFile << "(MEM) mallctl: background_thread value was ";
+		if (foo) {
+			logFile << "true";
+		} else {
+			logFile << "false";
+		}
+	}
+	// Set background threads to true
+	foo = true;
+	bar = 1;
+	je_mallctl("background_thread", NULL, NULL, &foo, bar);
+	if (logResult) {
+		// Read updated value
+		je_mallctl("background_thread", &foo, &bar, NULL, 0);
+		logFile << ", now set to ";
+		if (foo) {
+			logFile << "true";
+		} else {
+			logFile << "false";
+		}
+		logFile << "." << endl;
+	}
 #endif
 }

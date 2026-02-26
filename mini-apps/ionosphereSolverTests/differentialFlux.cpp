@@ -35,24 +35,24 @@ int main(int argc, char** argv) {
 	}
 	particle_energy[productionNumParticleEnergies] = 2*particle_energy[productionNumParticleEnergies-1] - particle_energy[productionNumParticleEnergies-2];
 
-   Real tempenergy = kB * T / CHARGE / 1000;
+	Real tempenergy = kB * T / CHARGE / 1000;
 	Real accenergy = productionMinAccEnergy;
 	std::cerr << "# Temperature of " << T << " K == Thermal energy of " << tempenergy << " keV" << std::endl;
 
-   for(int p=0; p<productionNumParticleEnergies; p++) {
-      // TODO: Kappa distribution here? Now only going for maxwellian
-      Real energyparam = (particle_energy[p]-accenergy)/tempenergy;
+	for(int p=0; p<productionNumParticleEnergies; p++) {
+		// TODO: Kappa distribution here? Now only going for maxwellian
+		Real energyparam = (particle_energy[p]-accenergy)/tempenergy;
 
-      if(particle_energy[p] > accenergy) {
-         Real deltaE = (particle_energy[p+1] - particle_energy[p])* 1e3*CHARGE;  // dE in J
+		if(particle_energy[p] > accenergy) {
+			Real deltaE = (particle_energy[p+1] - particle_energy[p])* 1e3*CHARGE; // dE in J
 
-         differentialFlux[p] = sqrt(1. / (2. * M_PI * MASS_ELECTRON))
-            * particle_energy[p] / tempenergy / sqrt(tempenergy * 1e3 *CHARGE)
-            * deltaE * exp(-energyparam);
-      } else {
-         differentialFlux[p] = 0;
-      }
-   }
+			differentialFlux[p] = sqrt(1. / (2. * M_PI * MASS_ELECTRON))
+			                      * particle_energy[p] / tempenergy / sqrt(tempenergy * 1e3 *CHARGE)
+			                      * deltaE * exp(-energyparam);
+		} else {
+			differentialFlux[p] = 0;
+		}
+	}
 
 	std::cout << "#Energy (keV)\tFlux (1/m²/s)" << std::endl;
 	for(int p=0; p<productionNumParticleEnergies; p++) {
