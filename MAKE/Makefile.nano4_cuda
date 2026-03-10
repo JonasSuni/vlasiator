@@ -76,7 +76,7 @@ INC_CUDA =
 #======== Libraries ===========
 LIBRARY_PREFIX = $(CURDIR)/libraries-nano4_cuda
 
-INC_BOOST = -L/opt/ohpc/pub/libs/gnu14/openmpi5/boost/1.88.0/include
+INC_BOOST = -I/opt/ohpc/pub/libs/gnu14/openmpi5/boost/1.88.0/include
 LIB_BOOST = -L/opt/ohpc/pub/libs/gnu14/openmpi5/boost/1.88.0/lib
 
 INC_ZOLTAN = -I$(LIBRARY_PREFIX)/include
