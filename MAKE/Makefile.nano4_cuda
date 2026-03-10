@@ -59,11 +59,11 @@ MATHFLAGS = --use_fast_math
 # nvcc fast_math does not assume only finite math
 testpackage: MATHFLAGS = --prec-sqrt=true --prec-div=true --ftz=false --fmad=false
 
-LDFLAGS = -O2 -g -lnvToolsExt -L/usr/local/cuda/lib64 -lcudart
+LDFLAGS = -O2 -g -lnvToolsExt -lcudart
 LIB_MPI = -lgomp
 
-LIB_CUDA = -L/usr/local/cuda/lib64
-INC_CUDA = -I/usr/local/cuda/include
+LIB_CUDA = -lcudart
+INC_CUDA = 
 
 #======== PAPI ==========
 #Add PAPI_MEM define to use papi to report memory consumption?
@@ -77,7 +77,7 @@ INC_CUDA = -I/usr/local/cuda/include
 LIBRARY_PREFIX = $(CURDIR)/libraries-nano4_cuda
 
 INC_BOOST = 
-LIB_BOOST = -lboost_program_options
+LIB_BOOST = -lboost_program_options -Wl, -rpath=/opt/ohpc/pub/libs/gnu14/openmpi5/boost/1.88.0/lib
 
 INC_ZOLTAN = -I$(LIBRARY_PREFIX)/include
 LIB_ZOLTAN = -L$(LIBRARY_PREFIX)/lib -lzoltan
