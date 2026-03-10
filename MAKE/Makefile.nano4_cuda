@@ -44,7 +44,9 @@ CMP = OMPI_CXX='nvcc' OMPI_CXXFLAGS='' mpic++
 # Now tell also the linker to use nvcc
 # These are found with  mpic++ --showme:link
 # The line below indeed uses OMPI_CXX, not OMPI_LD
-LNK = OMPI_CXX='nvcc' OMPI_CXXFLAGS='-arch=sm_86' OMPI_LIBS='-L/usr/lib/x86_64-linux-gnu/openmpi/lib' OMPI_LDFLAGS='-lmpi_cxx -lmpi -L/usr/local/cuda/lib64 -lcudart' mpic++
+# LNK = OMPI_CXX='nvcc' OMPI_CXXFLAGS='-arch=sm_86' OMPI_LIBS='-L/usr/lib/x86_64-linux-gnu/openmpi/lib' OMPI_LDFLAGS='-lmpi_cxx -lmpi -L/usr/local/cuda/lib64 -lcudart' mpic++
+LNK = OMPI_CXX='nvcc' OMPI_CXXFLAGS='-arch=sm_86' OMPI_LIBS='-L/opt/ohpc/pub/mpi/openmpi5-gnu14/5.0.7/lib' OMPI_LDFLAGS='-Wl,-rpath -Wl,/opt/ohpc/pub/mpi/openmpi5-gnu14/5.0.7/lib -Wl,--enable-new-dtags -lmpi -lcudart' mpic++
+
 
 #-G (device debug) overrides --generate-line-info -line-info
 # but also requires more device-side resources to run
