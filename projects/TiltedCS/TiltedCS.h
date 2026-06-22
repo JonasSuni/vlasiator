@@ -74,7 +74,7 @@ namespace projects {
       refineSpatialCells(dccrg::Dccrg<spatial_cell::SpatialCell, dccrg::Cartesian_Geometry>& mpiGrid) const override;
       // Interpolate between up- and downstream quantities
       // based on position
-      Real interpolate(Real u, Real d, Real x) const;
+      Real interpolate(Real u, Real d, Real x, Real x0 = 0) const;
 
       // Upstream bulk values
       Real B0u[3];
@@ -91,7 +91,8 @@ namespace projects {
       int Bzusign;
       int Bzdsign;
 
-      Real Shockwidth;
+      Real CSwidth;
+      Real CSangle
       Real AMR_L1width;
       Real AMR_L2width;
       Real AMR_L3width;

@@ -59,7 +59,8 @@ namespace projects {
       RP::add("TiltedCS.BX0d", "Downstream mag. field value (T)", 1.0e-9);
       RP::add("TiltedCS.BY0d", "Downstream mag. field value (T)", 2.0e-9);
       RP::add("TiltedCS.BZ0d", "Downstream mag. field value (T)", 3.0e-9);
-      RP::add("TiltedCS.Width", "Shock Width (m)", 50000);
+      RP::add("TiltedCS.Width", "Current sheet Width (m)", 50000);
+      RP::add("TiltedCS.Angle", "Current sheet Angle (deg)", 0);
 
       RP::add("TiltedCS.AMR_L1width", "L1 AMR region width (m)", 0);
       RP::add("TiltedCS.AMR_L2width", "L2 AMR region width (m)", 0);
@@ -96,7 +97,11 @@ namespace projects {
       RP::get("TiltedCS.BX0d", this->B0d[0]);
       RP::get("TiltedCS.BY0d", this->B0d[1]);
       RP::get("TiltedCS.BZ0d", this->B0d[2]);
-      RP::get("TiltedCS.Width", this->Shockwidth);
+      RP::get("TiltedCS.Width", this->CSwidth);
+      RP::get("TiltedCS.Angle", this->CSangle);
+
+      this->CSangle = this->CSangle*M_PI/180;
+      this->CSwidth = this->CSwidth*abs(cos(this->CSangle));
 
       RP::get("TiltedCS.AMR_L1width", this->AMR_L1width);
       RP::get("TiltedCS.AMR_L2width", this->AMR_L2width);
@@ -150,7 +155,7 @@ namespace projects {
          //std::cerr << "tempd = " << this->TEMPERATUREd << std::endl;
 
          //std::cerr << "maxwCutoff = " << this->maxwCutoff << std::endl;
-         //std::cerr << "Width = " << this->Shockwidth << std::endl;
+         //std::cerr << "Width = " << this->CSwidth << std::endl;
       }
       */
 
@@ -405,9 +410,21 @@ namespace projects {
 
    void TiltedCS::calcCellParameters(spatial_cell::SpatialCell* cell, creal& t) { }
 
-   Real TiltedCS::interpolate(Real upstream, Real downstream, Real x) const {
-      Real coord = 0.5 + x/this->Shockwidth; //Now shock will be from 0 to 1
-      //x /= 0.5 * this->Shockwidth;
+   Real TiltedCS::interpolate(Real upstream, Real downstream, Real x, Real x0) const {
+
+      Real dxmax = (P::xmax - P::xmin)/P::xcells_ini;
+      Real coord;
+
+      if (this->CSwidth > dxmax) {
+         coord = 0.5 + (x - x0)/this->CSwidth; //Now shock will be from 0 to 1
+      } else {
+         if (x<=x0) {
+            coord = 0.0;
+         } else {
+            coord = 1.0;
+         }
+      }
+      //x /= 0.5 * this->CSwidth;
       Real a = 0.0;
       if (coord <= 0.0) a = downstream;
       if (coord >= 1.0) a = upstream;
