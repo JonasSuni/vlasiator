@@ -20,9 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 %
-Interplanetary shock project by Markus Battarbee (markus.battarbee@gmail.com)
-Based on SilvaShock project by Urs Ganse
-Previous development version name was UtuShock
+Tilted current sheet project by Jonas Suni
+Based on Interplanetary shock project by Markus Battarbee (markus.battarbee@gmail.com)
 */
 
 #include <cstdlib>
@@ -263,31 +262,20 @@ namespace projects {
       const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
       const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
 
+      const Real x0 = tan(this->CSangle) * z;
+
       // Interpolate density between upstream and downstream
       // All other values are calculated from jump conditions
-      Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+      Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x, x0);
       if (DENSITY < 1e-20) {
          std::cout<<"density too low! "<<DENSITY<<" x "<<x<<" y "<<y<<" z "<<z<<std::endl;
       }
     
       // Solve tangential components for B and V
-      Real hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
-      Real hereBX = this->B0u[0];
-      Real MAsq = std::pow((sP.V0u[0]/this->B0u[0]), 2) * sP.DENSITYu * mass * mu0;
-      Real hereBtang = this->B0u[2] * (MAsq - 1.0)/(MAsq*hereVX/sP.V0u[0] -1.0);
-      Real hereVtang = hereVX * hereBtang / hereBX;
-
-      /* Reconstruct Y and Z components using cos(phi) values and signs. Tangential variables are always positive. */
-      //Real hereBY = hereBtang * this->Bucosphi * this->Byusign;
-      //Real hereBZ = hereBtang * sqrt(1. - this->Bucosphi * this->Bucosphi) * this->Bzusign;
-      Real hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
-      Real hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
-
-      // Old incorrect temperature - just interpolate for now
-      //Real adiab = 5./3.;
-      //Real TEMPERATURE = this->TEMPERATUREu + (mass*(adiab-1.0)/(2.0*KB*adiab)) * 
-      //  ( std::pow(this->V0u[0],2) + std::pow(this->V0u[2],2) - std::pow(hereVX,2) - std::pow(hereVZ,2) );
-      Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
+      Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x, x0);
+      Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x, x0);
+      Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x, x0);
+      Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x, x0);
 
       Real initRho = DENSITY;
       Real initT = TEMPERATURE;
@@ -345,20 +333,18 @@ namespace projects {
       const Real y  = cell->parameters[CellParams::YCRD] + 0.5*cell->parameters[CellParams::DY];
       const Real z  = cell->parameters[CellParams::ZCRD] + 0.5*cell->parameters[CellParams::DZ];
 
+      const Real x0 = tan(this->CSangle) * z;
+
       const Real mu0 = physicalconstants::MU_0;
       const Real mass = getObjectWrapper().particleSpecies[popID].mass;
-      Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
+      Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x, x0);
       if (DENSITY < 1e-20) {
          std::cout<<"density too low! "<<DENSITY<<" x "<<x<<" y "<<y<<" z "<<z<<std::endl;
       }
-      Real hereVX = sP.DENSITYu * sP.V0u[0] / DENSITY;
-      Real hereBX = this->B0u[0];
-      Real MAsq = std::pow((sP.V0u[0]/this->B0u[0]), 2) * sP.DENSITYu * mass * mu0;
-      Real hereBtang = this->B0u[2] * (MAsq - 1.0)/(MAsq*hereVX/sP.V0u[0] -1.0);
-      Real hereVtang = hereVX * hereBtang / hereBX;
-      Real hereVY = abs(hereVtang) * sP.Vucosphi * sP.Vyusign;
-      Real hereVZ = abs(hereVtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
-      Real TEMPERATURE = interpolate(sP.TEMPERATUREu,sP.TEMPERATUREd, x);
+      Real hereVX = interpolate(sP.V0u[0], sP.V0d[0], x, x0);
+      Real hereVY = interpolate(sP.V0u[1], sP.V0d[1], x, x0);
+      Real hereVZ = interpolate(sP.V0u[2], sP.V0d[2], x, x0);
+      Real TEMPERATURE = interpolate(sP.TEMPERATUREu, sP.TEMPERATUREd, x, x0);
       Real initRho = DENSITY;
       Real initT = TEMPERATURE;
       const Real initV0X = hereVX;
@@ -377,6 +363,8 @@ namespace projects {
       Real mu0 = physicalconstants::MU_0;
       const TiltedCSSpeciesParameters& sP = this->speciesParams[popID];
 
+      const Real x0 = tan(this->CSangle) * z;
+
       // Interpolate density between upstream and downstream
       // All other values are calculated from jump conditions
       Real DENSITY = interpolate(sP.DENSITYu,sP.DENSITYd, x);
@@ -385,21 +373,13 @@ namespace projects {
       }
     
       // Solve tangential components for B and V
-      Real VX = sP.DENSITYu * sP.V0u[0] / DENSITY;
-      Real BX = this->B0u[0];
-      Real MAsq = std::pow((sP.V0u[0]/this->B0u[0]), 2) * sP.DENSITYu * mass * mu0;
-      Real Btang = this->B0utangential * (MAsq - 1.0)/(MAsq*VX/sP.V0u[0] -1.0);
-      Real Vtang = VX * Btang / BX;
-
-      /* Reconstruct Y and Z components using cos(phi) values and signs. Tangential variables are always positive. */
-      //Real BY = Btang * this->Bucosphi * this->Byusign;
-      //Real BZ = Btang * sqrt(1. - this->Bucosphi * this->Bucosphi) * this->Bzusign;
-      Real VY = abs(Vtang) * sP.Vucosphi * sP.Vyusign;
-      Real VZ = abs(Vtang) * sqrt(1. - sP.Vucosphi * sP.Vucosphi) * sP.Vzusign;
+      Real VX = interpolate(sP.V0u[0], sP.V0d[0], x, x0);
+      Real VY = interpolate(sP.V0u[1], sP.V0d[1], x, x0);
+      Real VZ = interpolate(sP.V0u[2], sP.V0d[2], x, x0);
 
       // Disable compiler warnings: (unused variables but the function is inherited)
       (void)y;
-      (void)z;
+      // (void)z;
     
       std::array<Real, 3> V0 {{VX, VY, VZ}};
       std::vector<std::array<Real, 3>> retval;
@@ -458,34 +438,10 @@ namespace projects {
             /* Maintain all values in BPERT for simplicity */
             Real mu0 = physicalconstants::MU_0;
 
-            // Interpolate density between upstream and downstream
-            // All other values are calculated from jump conditions
-            Real MassDensity = 0.;
-            Real MassDensityU = 0.;
-            Real EffectiveVu0 = 0.;
-            for (uint i = 0; i < getObjectWrapper().particleSpecies.size(); i++) {
-               const TiltedCSSpeciesParameters& sP = speciesParams_l[i];
-               Real mass = getObjectWrapper().particleSpecies[i].mass;
-
-               MassDensity += mass * interpolate(sP.DENSITYu, sP.DENSITYd, xyz[0]);
-               MassDensityU += mass * sP.DENSITYu;
-               EffectiveVu0 += sP.V0u[0] * mass * sP.DENSITYu;
-            }
-            EffectiveVu0 /= MassDensityU;
-
-            // Solve tangential components for B and V
-            Real VX = MassDensityU * EffectiveVu0 / MassDensity;
-            Real BX = B0u_l[0];
-            Real MAsq = std::pow((EffectiveVu0 / B0u_l[0]), 2) * MassDensityU * mu0;
-            Real Btang = B0utangential_l * (MAsq - 1.0) / (MAsq * VX / EffectiveVu0 - 1.0);
-
-            /* Reconstruct Y and Z components using cos(phi) values and signs. Tangential variables are always
-             * positive. */
-            Real BY = abs(Btang) * Bucosphi_l * Byusign_l;
-            Real BZ = abs(Btang) * sqrt(1. - Bucosphi_l * Bucosphi_l) * Bzusign_l;
-            // Real Vtang = VX * Btang / BX;
-            // Real VY = Vtang * this->Vucosphi * this->Vyusign;
-            // Real VZ = Vtang * sqrt(1. - this->Vucosphi * this->Vucosphi) * this->Vzusign;
+            const Real x0 = tan(this->CSangle) * xyz[2];
+            Real BX = interpolate(B0u[0], B0d[0], xyz[0], x0);
+            Real BY = interpolate(B0u[1], B0d[1], xyz[0], x0);
+            Real BZ = interpolate(B0u[2], B0d[2], xyz[0], x0);
 
             cell[fsgrids::bfield::PERBX] = BX;
             cell[fsgrids::bfield::PERBY] = BY;
