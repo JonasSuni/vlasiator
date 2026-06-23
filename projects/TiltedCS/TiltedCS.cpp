@@ -423,6 +423,8 @@ namespace projects {
 
      if (!P::isRestart) {
          const auto B0u_l = this->B0u; // copies for lambda capture
+         const auto B0d_l = this->B0d;
+         const auto CSangle_l = this->CSangle;
          const auto B0utangential_l = this->B0utangential;
          const auto Bucosphi_l = this->Bucosphi;
          const auto Byusign_l = this->Byusign;
@@ -438,10 +440,10 @@ namespace projects {
             /* Maintain all values in BPERT for simplicity */
             Real mu0 = physicalconstants::MU_0;
 
-            const Real x0 = tan(this->CSangle) * xyz[2];
-            Real BX = interpolate(B0u[0], B0d[0], xyz[0], x0);
-            Real BY = interpolate(B0u[1], B0d[1], xyz[0], x0);
-            Real BZ = interpolate(B0u[2], B0d[2], xyz[0], x0);
+            const Real x0 = tan(CSangle_l) * xyz[2];
+            Real BX = interpolate(B0u_l[0], B0d_l[0], xyz[0], x0);
+            Real BY = interpolate(B0u_l[1], B0d_l[1], xyz[0], x0);
+            Real BZ = interpolate(B0u_l[2], B0d_l[2], xyz[0], x0);
 
             cell[fsgrids::bfield::PERBX] = BX;
             cell[fsgrids::bfield::PERBY] = BY;
