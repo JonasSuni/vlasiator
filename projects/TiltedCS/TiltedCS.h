@@ -92,7 +92,7 @@ namespace projects {
       int Bzdsign;
 
       Real CSwidth;
-      Real CSangle
+      Real CSangle;
       Real AMR_L1width;
       Real AMR_L2width;
       Real AMR_L3width;
