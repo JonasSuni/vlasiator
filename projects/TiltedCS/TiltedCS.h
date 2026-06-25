@@ -75,6 +75,7 @@ namespace projects {
       // Interpolate between up- and downstream quantities
       // based on position
       Real interpolate(Real u, Real d, Real x, Real x0 = 0) const;
+      Real interpolateB(Real u[3], Real d[3], Real x, Real y, Real z, Real width, Real angle, uint component) const;
 
       // Upstream bulk values
       Real B0u[3];

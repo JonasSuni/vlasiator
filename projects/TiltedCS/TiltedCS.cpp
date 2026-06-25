@@ -416,6 +416,34 @@ namespace projects {
       return a;
    }
 
+   Real TiltedCS::interpolateB(Real B0u[3], Real B0d[3], Real x, Real y, Real z, Real width, Real angle, uint component) const {
+
+      Real xrot = cos(angle)*x + sin(angle)*z;
+      Real yrot = y;
+      Real zrot = -sin(angle)*x + cos(angle)*z;
+
+      Real s = (xrot + width / 2.0)/width;
+
+      Real S2 = 6*s*s*s*s*s - 15*s*s*s*s + 10*s*s*s;
+      Real S2prime = 30*s*s*s*s - 60*s*s*s + 30*s*s;
+
+      Real Bx = B0d[0] - S2*B0d[0] + S2*B0u[0];
+      Real By = B0d[1] - S2*B0d[1] + S2*B0u[1] + S2prime*((B0u[0]-B0d[0])*yrot - (B0u[1]-B0d[1])*xrot)/(2.0 * width);
+      Real Bz = B0d[2] - S2*B0d[2] + S2*B0u[2] + S2prime*((B0u[0]-B0d[0])*zrot - (B0u[2]-B0d[2])*xrot)/(2.0 * width);
+
+      Real Brotx = cos(-angle)*Bx + sin(-angle)*Bz;
+      Real Broty = By;
+      Real Brotz = -sin(-angle)*Bx + cos(-angle)*Bz;
+
+      if (component == 0) {
+         return Brotx;
+      } else if (component == 1) {
+         return Broty;
+      } else if (component == 2) {
+         return Brotz;
+      }
+   }
+
   void TiltedCS::setProjectBField(fsgrids::perbspan perb,
                                  fsgrids::bgbspan bgb,
                                  fsgrids::technicalspan technical, FieldSolverGrid &fsgrid) {
@@ -425,6 +453,7 @@ namespace projects {
          const auto B0u_l = this->B0u; // copies for lambda capture
          const auto B0d_l = this->B0d;
          const auto CSangle_l = this->CSangle;
+         const auto CSwidth_l = this->CSwidth;
          const auto B0utangential_l = this->B0utangential;
          const auto Bucosphi_l = this->Bucosphi;
          const auto Byusign_l = this->Byusign;
@@ -440,10 +469,13 @@ namespace projects {
             /* Maintain all values in BPERT for simplicity */
             Real mu0 = physicalconstants::MU_0;
 
-            const Real x0 = tan(CSangle_l) * xyz[2];
-            Real BX = interpolate(B0u_l[0], B0d_l[0], xyz[0], x0);
-            Real BY = interpolate(B0u_l[1], B0d_l[1], xyz[0], x0);
-            Real BZ = interpolate(B0u_l[2], B0d_l[2], xyz[0], x0);
+            // const Real x0 = tan(CSangle_l) * xyz[2];
+            // Real BX = interpolate(B0u_l[0], B0d_l[0], xyz[0], x0);
+            // Real BY = interpolate(B0u_l[1], B0d_l[1], xyz[0], x0);
+            // Real BZ = interpolate(B0u_l[2], B0d_l[2], xyz[0], x0);
+            Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,0);
+            Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,1);
+            Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,2);
 
             cell[fsgrids::bfield::PERBX] = BX;
             cell[fsgrids::bfield::PERBY] = BY;
