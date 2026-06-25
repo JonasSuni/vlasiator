@@ -474,8 +474,8 @@ namespace projects {
             // Real BY = interpolate(B0u_l[1], B0d_l[1], xyz[0], x0);
             // Real BZ = interpolate(B0u_l[2], B0d_l[2], xyz[0], x0);
             Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,0);
-            Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,1);
-            Real BX = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,2);
+            Real BY = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,1);
+            Real BZ = interpolateB(B0u_l,B0d_l,xyz[0],xyz[1],xyz[2],CSwidth_l,CSangle_l,2);
 
             cell[fsgrids::bfield::PERBX] = BX;
             cell[fsgrids::bfield::PERBY] = BY;
