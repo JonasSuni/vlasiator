@@ -418,24 +418,24 @@ namespace projects {
 
    Real TiltedCS::interpolateB(Real B0u[3], Real B0d[3], Real x, Real y, Real z, Real width, Real angle, uint component) const {
 
-      Real xrot = cos(-1*angle)*x + sin(-1*angle)*z;
+      Real xrot = cos(-1.0*angle)*x + sin(-1.0*angle)*z;
       Real yrot = y;
-      Real zrot = -1*sin(-1*angle)*x + cos(-1*angle)*z;
+      Real zrot = -1.0*sin(-1.0*angle)*x + cos(-1.0*angle)*z;
 
       Real s = (xrot + width / 2.0)/width;
 
       Real S2;
       Real S2prime;
 
-      if (s <= 0) {
+      if (s <= 0.0) {
          S2 = 0.0;
          S2prime = 0.0;
-      } else if (s >= 1) {
+      } else if (s >= 1.0) {
          S2 = 1.0;
          S2prime = 0.0;
-      } else if ((s > 0.0) && (s < 1.0)) {
-         S2 = 6*s*s*s*s*s - 15*s*s*s*s + 10*s*s*s;
-         S2prime = 30*s*s*s*s - 60*s*s*s + 30*s*s;
+      } else {
+         S2 = 6.0*s*s*s*s*s - 15.0*s*s*s*s + 10.0*s*s*s;
+         S2prime = 30.0*s*s*s*s - 60.0*s*s*s + 30.0*s*s;
       }
 
       Real Bx = B0d[0] - S2*B0d[0] + S2*B0u[0];
@@ -444,7 +444,7 @@ namespace projects {
 
       Real Brotx = cos(angle)*Bx + sin(angle)*Bz;
       Real Broty = By;
-      Real Brotz = -1*sin(angle)*Bx + cos(angle)*Bz;
+      Real Brotz = -1.0*sin(angle)*Bx + cos(angle)*Bz;
 
       if (component == 0) {
          return Brotx;
