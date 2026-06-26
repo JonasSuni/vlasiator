@@ -424,8 +424,19 @@ namespace projects {
 
       Real s = (xrot + width / 2.0)/width;
 
-      Real S2 = 6*s*s*s*s*s - 15*s*s*s*s + 10*s*s*s;
-      Real S2prime = 30*s*s*s*s - 60*s*s*s + 30*s*s;
+      Real S2;
+      Real S2prime;
+
+      if (s <= 0) {
+         S2 = 0.0;
+         S2prime = 0.0;
+      } else if (s >= 1) {
+         S2 = 1.0;
+         S2prime = 0.0;
+      } else if ((s > 0.0) && (s < 1.0)) {
+         S2 = 6*s*s*s*s*s - 15*s*s*s*s + 10*s*s*s;
+         S2prime = 30*s*s*s*s - 60*s*s*s + 30*s*s;
+      }
 
       Real Bx = B0d[0] - S2*B0d[0] + S2*B0u[0];
       Real By = B0d[1] - S2*B0d[1] + S2*B0u[1] + S2prime*((B0u[0]-B0d[0])*yrot - (B0u[1]-B0d[1])*xrot)/(2.0 * width);
