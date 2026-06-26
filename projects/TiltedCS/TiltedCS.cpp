@@ -418,9 +418,9 @@ namespace projects {
 
    Real TiltedCS::interpolateB(Real B0u[3], Real B0d[3], Real x, Real y, Real z, Real width, Real angle, uint component) const {
 
-      Real xrot = cos(-angle)*x + sin(-angle)*z;
+      Real xrot = cos(-1*angle)*x + sin(-1*angle)*z;
       Real yrot = y;
-      Real zrot = -sin(-angle)*x + cos(-angle)*z;
+      Real zrot = -1*sin(-1*angle)*x + cos(-1*angle)*z;
 
       Real s = (xrot + width / 2.0)/width;
 
@@ -444,7 +444,7 @@ namespace projects {
 
       Real Brotx = cos(angle)*Bx + sin(angle)*Bz;
       Real Broty = By;
-      Real Brotz = -sin(angle)*Bx + cos(angle)*Bz;
+      Real Brotz = -1*sin(angle)*Bx + cos(angle)*Bz;
 
       if (component == 0) {
          return Brotx;
