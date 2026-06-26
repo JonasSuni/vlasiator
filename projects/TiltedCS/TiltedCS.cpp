@@ -422,6 +422,14 @@ namespace projects {
       Real yrot = y;
       Real zrot = -1.0*sin(-1.0*angle)*x + cos(-1.0*angle)*z;
 
+      Real B0xu = cos(-1.0*angle)*B0u[0] + sin(-1.0*angle)*B0u[2];
+      Real B0yu = B0u[1];
+      Real B0zu = -1.0*sin(-1.0*angle)*B0u[0] + cos(-1.0*angle)*B0u[2];
+
+      Real B0xd = cos(-1.0*angle)*B0d[0] + sin(-1.0*angle)*B0d[2];
+      Real B0yd = B0d[1];
+      Real B0zd = -1.0*sin(-1.0*angle)*B0d[0] + cos(-1.0*angle)*B0d[2];
+
       Real s = (xrot + width / 2.0)/width;
 
       Real S2;
@@ -438,9 +446,9 @@ namespace projects {
          S2prime = 30.0*s*s*s*s - 60.0*s*s*s + 30.0*s*s;
       }
 
-      Real Bx = B0d[0] - S2*B0d[0] + S2*B0u[0];
-      Real By = B0d[1] - S2*B0d[1] + S2*B0u[1] + S2prime*((B0u[0]-B0d[0])*yrot - (B0u[1]-B0d[1])*xrot)/(2.0 * width);
-      Real Bz = B0d[2] - S2*B0d[2] + S2*B0u[2] + S2prime*((B0u[0]-B0d[0])*zrot - (B0u[2]-B0d[2])*xrot)/(2.0 * width);
+      Real Bx = B0xd - S2*B0xd + S2*B0xu;
+      Real By = B0yd - S2*B0yd + S2*B0yu + S2prime*((B0xu-B0xd)*yrot - (B0yu-B0yd)*xrot)/(2.0 * width);
+      Real Bz = B0zd - S2*B0zd + S2*B0zu + S2prime*((B0xu-B0xd)*zrot - (B0zu-B0zd)*xrot)/(2.0 * width);
 
       Real Brotx = cos(angle)*Bx + sin(angle)*Bz;
       Real Broty = By;
