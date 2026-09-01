@@ -1552,7 +1552,7 @@ bool retrieveOptions( const int argn, char *args[], UserOptions & mainOptions ) 
       //app.add_flag("--help", flags.help, "display help");
       app.add_flag("--debug", flags.debug, "write debugging info to stderr");
       app.add_option("--cellid", flags.cellid, "Set cell id");
-      app.add_option("cellidlist", flags.cellidlist, "Set list of cell ids");
+      app.add_option("--cellidlist", flags.cellidlist, "Set list of cell ids");
       app.add_flag("--rotate", flags.rotate, "Rotate velocities so that they face z-axis");
       app.add_option("--plasmaFrame", flags.plasmaFrame, "Shift the distribution so that the bulk velocity is 0");
       app.add_option("--coordinates", flags.coordinates, "Set spatial coordinates x y z");
@@ -2047,7 +2047,7 @@ int main(int argn, char* args[]) {
    UserOptions mainOptions;
 
    //Get user input and set the retrieve options variables
-   if( retrieveOptions( argn-1, args+1, mainOptions ) == false ) {
+   if( retrieveOptions( argn, args, mainOptions ) == false ) {
       //Failed to retrieve options (Due to contradiction or an error)
       printUsageMessage(); //Prints the usage message
       return 0;
