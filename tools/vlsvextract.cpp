@@ -61,6 +61,7 @@ static struct {
 	std::vector<Real> point1, point2;
 	unsigned int pointAmount;
 	std::vector<string> outputdirectory;
+	std::string mask;
 } flags = {}; // static variables should be init with 0s anyway
 
 // If set to true, vlsvextract writes some debugging info to stderr
@@ -1561,6 +1562,7 @@ bool retrieveOptions( const int argn, char *args[], UserOptions & mainOptions ) 
       app.add_option("--point2", flags.point2, "Set the ending point x y z of a line");
       app.add_option("--pointamount", flags.pointAmount, "Number of points along a line (OPTIONAL)");
       app.add_option("--outputdirectory", flags.outputdirectory, "The directory where the file is saved (default current folder) (OPTIONAL)");
+      app.add_option("file", flags.mask, "The input file path.");
 
       CLI11_PARSE(app, argn, args);
          
