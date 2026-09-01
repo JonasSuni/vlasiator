@@ -2047,7 +2047,7 @@ int main(int argn, char* args[]) {
    UserOptions mainOptions;
 
    //Get user input and set the retrieve options variables
-   if( retrieveOptions( argn, args, mainOptions ) == false ) {
+   if( retrieveOptions( argn-1, args+1, mainOptions ) == false ) {
       //Failed to retrieve options (Due to contradiction or an error)
       printUsageMessage(); //Prints the usage message
       return 0;
