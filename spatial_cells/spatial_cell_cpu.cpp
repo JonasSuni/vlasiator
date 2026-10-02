@@ -536,7 +536,7 @@ namespace spatial_cell {
 
       if (displacements.size() > 0) {
          if (displacements.size() == 1) {
-            address = address + displacements[0];
+            address = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(address) + displacements[0]);
             count = block_lengths[0];
             datatype = MPI_BYTE;
          } else {
